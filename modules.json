@@ -1,6 +1,6 @@
 {
-    "name": "nf-core/bovisanalyzer",
-    "homePage": "https://github.com/nf-core/bovisanalyzer",
+    "name": "avantonder/bovisanalyzer",
+    "homePage": "https://github.com/avantonder/bovisanalyzer",
     "repos": {
         "nf-core/modules": {
             "custom/dumpsoftwareversions": {

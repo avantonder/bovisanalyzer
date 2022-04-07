@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/bovisanalyzer
+    avantonder/bovisanalyzer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/bovisanalyzer
+    Github : https://github.com/avantonder/bovisanalyzer
     Website: https://nf-co.re/bovisanalyzer
     Slack  : https://nfcore.slack.com/channels/bovisanalyzer
 ----------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ WorkflowMain.initialise(workflow, params, log)
 include { BOVISANALYZER } from './workflows/bovisanalyzer'
 
 //
-// WORKFLOW: Run main nf-core/bovisanalyzer analysis pipeline
+// WORKFLOW: Run main avantonder/bovisanalyzer analysis pipeline
 //
 workflow NFCORE_BOVISANALYZER {
     BOVISANALYZER ()

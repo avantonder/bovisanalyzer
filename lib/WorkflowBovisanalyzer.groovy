@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the workflow/bovisanalyzer.nf in the nf-core/bovisanalyzer pipeline
+// This file holds several functions specific to the workflow/bovisanalyzer.nf in the avantonder/bovisanalyzer pipeline
 //
 
 class WorkflowBovisanalyzer {

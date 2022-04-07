@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/bovisanalyzer/master/nextflow_schema.json",
-    "title": "nf-core/bovisanalyzer pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/avantonder/bovisanalyzer/master/nextflow_schema.json",
+    "title": "avantonder/bovisanalyzer pipeline parameters",
     "description": "nextflow pipeline for analyzing Mycobacterium bovis genomes",
     "type": "object",
     "definitions": {

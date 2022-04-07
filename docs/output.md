@@ -1,4 +1,4 @@
-# nf-core/bovisanalyzer: Output
+# avantonder/bovisanalyzer: Output
 
 ## Introduction
 
