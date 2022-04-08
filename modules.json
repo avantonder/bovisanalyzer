@@ -3,13 +3,28 @@
     "homePage": "https://github.com/avantonder/bovisanalyzer",
     "repos": {
         "nf-core/modules": {
+            "bbmap/bbduk": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "bracken/bracken": {
+                "git_sha": "9c386c5dd8a42b5cb589cea7244e3960c8dfdacf"
+            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "fastqc": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
+            "fastqscan": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "kraken2/kraken2": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
             "multiqc": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "tbprofiler/profile": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             }
         }
