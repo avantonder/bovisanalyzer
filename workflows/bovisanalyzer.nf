@@ -41,6 +41,7 @@ include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
+include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'            addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
 include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
 include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
@@ -55,7 +56,6 @@ include { TBPROFILER                  } from '../subworkflows/local/tbprofiler/m
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
 include { FASTQSCAN                   } from '../modules/nf-core/modules/fastqscan/main'
 include { KRAKEN2_KRAKEN2             } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { BRACKEN_BRACKEN             } from '../modules/nf-core/modules/bracken/bracken/main'
@@ -86,22 +86,40 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
-    // MODULE: Run fastq-scan
+    // MODULE: Run bwa index
+    //
+    BWA_INDEX (
+        ch_reference
+    )
 
+    //
+    // MODULE: Run fastq-scan
+    //
     FASTQSCAN (
         INPUT_CHECK.out.reads
     )
-    
+    ch_versions = ch_versions.mix(FASTQSCAN.out.versions.first())
+
+    //
+    // SUBWORKFLOW: Read QC and trim adapters
+    //
+    FASTQC_FASTP (
+        INPUT_CHECK.out.reads
+    )
+    ch_reads    = FASTQC_FASTP.out.reads
+    ch_versions = ch_versions.mix(FASTQC_FASTP.out.fastqc_version.first())
+    ch_versions = ch_versions.mix(FASTQC_FASTP.out.fastp_version.first())
+
     //
     // MODULE: Run kraken2
     //  
     KRAKEN2_KRAKEN2 (
-            INPUT_CHECK.out.reads,
+            ch_reads,
             ch_kraken2db
         )
-        ch_kraken2_bracken       = KRAKEN2_RUN.out.txt
-        ch_kraken2_krakenparse   = KRAKEN2_RUN.out.txt
-        ch_software_versions     = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+    ch_kraken2_bracken       = KRAKEN2_KRAKEN2.out.txt
+    ch_kraken2_krakenparse   = KRAKEN2_KRAKEN2.out.txt
+    ch_versions     = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
     //
     // MODULE: Run bracken
@@ -110,8 +128,8 @@ workflow BOVISANALYZER {
             ch_kraken2_bracken,
             ch_brackendb
         )
-        ch_bracken_krakenparse = BRACKEN.out.report
-        ch_software_versions   = ch_software_versions.mix(BRACKEN.out.version.first().ifEmpty(null))
+    ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
+    ch_versions   = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
 
     //
     // MODULE: Run krakenparse
@@ -120,20 +138,24 @@ workflow BOVISANALYZER {
             ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
             ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
         )
-        ch_software_versions = ch_software_versions.mix(KRAKENPARSE.out.version.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(KRAKENPARSE.out.version.first())
+
+    //
+    // SUBWORKFLOW: Subsample reads
+    //
+    SUB_SAMPLING(
+            ch_reads
+        )
+    ch_reads = SUB_SAMPLING.out.reads
+
+    //
+    // SUBWORKFLOW: TBprofiler
+    //
+    TBPROFILER(
+            ch_reads
+        )
+    ch_versions = ch_versions.mix(TBPROFILER.out.versions.first())
     
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC (
-        INPUT_CHECK.out.reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
-
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
-
     //
     // MODULE: Map reads
     //
@@ -141,7 +163,7 @@ workflow BOVISANALYZER {
         ch_reads,
         BWA_INDEX.out.index
     )
-    ch_software_versions = ch_software_versions.mix(BWA_MEM.out.version.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(BWA_MEM.out.versions.first())
 
     //
     // SUBWORKFLOW: Sort bam files
@@ -149,7 +171,7 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_software_versions = ch_software_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first())
 
     //
     // SUBWORKFLOW: Call variants
@@ -158,7 +180,7 @@ workflow BOVISANALYZER {
         BAM_SORT_SAMTOOLS.out.bam,
         ch_reference
     )
-    ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
     //
     // MODULE: Make pseudogenome from VCF
@@ -189,6 +211,13 @@ workflow BOVISANALYZER {
     aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
         .map{ it[1] }
         .set { aligned_pseudogenomes }
+
+    //
+    // MODULE: Collate software versions
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
 
     //
     // MODULE: MultiQC
