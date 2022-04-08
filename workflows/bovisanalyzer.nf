@@ -16,6 +16,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+if (params.reference) { ch_reference = file(params.reference) } else { exit 1, 'Reference fasta file not specified!' }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,7 +36,14 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { KRAKENPARSE           } from '../modules/local/krakenparse'
+include { VCF2PSEUDOGENOME      } from '../modules/local/vcf2pseudogenome'
+include { ALIGNPSEUDOGENOMES    } from '../modules/local/alignpseudogenomes'
+
+include { INPUT_CHECK           } from '../subworkflows/local/input_check'
+include { BAM_SORT_SAMTOOLS     } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
+include { VARIANTS_BCFTOOLS     } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
+include { SUB_SAMPLING          } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,6 +55,12 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC                      } from '../modules/nf-core/modules/fastqc/main'
+include { FASTQSCAN                   } from '../modules/nf-core/modules/fastqscan/main'
+include { KRAKEN2_KRAKEN2             } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { BRACKEN_BRACKEN             } from '../modules/nf-core/modules/bracken/bracken/main'
+include { BWA_INDEX                   } from '../modules/nf-core/modules/bwa/index/main'
+include { BWA_MEM                     } from '../modules/nf-core/modules/bwa/mem/main'
+include { TBPROFILER_PROFILE          } from '../modules/nf-core/modules/tbprofiler/profiler/main'
 include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 

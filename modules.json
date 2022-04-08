@@ -9,6 +9,12 @@
             "bracken/bracken": {
                 "git_sha": "9c386c5dd8a42b5cb589cea7244e3960c8dfdacf"
             },
+            "bwa/index": {
+                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+            },
+            "bwa/mem": {
+                "git_sha": "950700bcdc0e9a2b6883d40d2c51c6fc435cd714"
+            },
             "custom/dumpsoftwareversions": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
