@@ -36,14 +36,15 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { KRAKENPARSE           } from '../modules/local/krakenparse'
-include { VCF2PSEUDOGENOME      } from '../modules/local/vcf2pseudogenome'
-include { ALIGNPSEUDOGENOMES    } from '../modules/local/alignpseudogenomes'
+include { KRAKENPARSE                 } from '../modules/local/krakenparse'
+include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
+include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 
-include { INPUT_CHECK           } from '../subworkflows/local/input_check'
-include { BAM_SORT_SAMTOOLS     } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
-include { VARIANTS_BCFTOOLS     } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
-include { SUB_SAMPLING          } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
+include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
+include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
+include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
+include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
+include { TBPROFILER                  } from '../subworkflows/local/tbprofiler/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,9 +61,8 @@ include { KRAKEN2_KRAKEN2             } from '../modules/nf-core/modules/kraken2
 include { BRACKEN_BRACKEN             } from '../modules/nf-core/modules/bracken/bracken/main'
 include { BWA_INDEX                   } from '../modules/nf-core/modules/bwa/index/main'
 include { BWA_MEM                     } from '../modules/nf-core/modules/bwa/mem/main'
-include { TBPROFILER_PROFILE          } from '../modules/nf-core/modules/tbprofiler/profiler/main'
 include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' addParams( options: [publish_to_base: true] )
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -86,6 +86,43 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
+    // MODULE: Run fastq-scan
+
+    FASTQSCAN (
+        INPUT_CHECK.out.reads
+    )
+    
+    //
+    // MODULE: Run kraken2
+    //  
+    KRAKEN2_KRAKEN2 (
+            INPUT_CHECK.out.reads,
+            ch_kraken2db
+        )
+        ch_kraken2_bracken       = KRAKEN2_RUN.out.txt
+        ch_kraken2_krakenparse   = KRAKEN2_RUN.out.txt
+        ch_software_versions     = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+
+    //
+    // MODULE: Run bracken
+    //
+    BRACKEN_BRACKEN (
+            ch_kraken2_bracken,
+            ch_brackendb
+        )
+        ch_bracken_krakenparse = BRACKEN.out.report
+        ch_software_versions   = ch_software_versions.mix(BRACKEN.out.version.first().ifEmpty(null))
+
+    //
+    // MODULE: Run krakenparse
+    //
+    KRAKENPARSE (
+            ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
+            ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
+        )
+        ch_software_versions = ch_software_versions.mix(KRAKENPARSE.out.version.first().ifEmpty(null))
+    
+    //
     // MODULE: Run FastQC
     //
     FASTQC (
@@ -96,6 +133,62 @@ workflow BOVISANALYZER {
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
+
+    //
+    // MODULE: Map reads
+    //
+    BWA_MEM (
+        ch_reads,
+        BWA_INDEX.out.index
+    )
+    ch_software_versions = ch_software_versions.mix(BWA_MEM.out.version.first().ifEmpty(null))
+
+    //
+    // SUBWORKFLOW: Sort bam files
+    //
+    BAM_SORT_SAMTOOLS (
+        BWA_MEM.out.bam
+    )
+    ch_software_versions = ch_software_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first().ifEmpty(null))
+
+    //
+    // SUBWORKFLOW: Call variants
+    //
+    VARIANTS_BCFTOOLS (
+        BAM_SORT_SAMTOOLS.out.bam,
+        ch_reference
+    )
+    ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
+
+    //
+    // MODULE: Make pseudogenome from VCF
+    //
+    VCF2PSEUDOGENOME (
+        VARIANTS_BCFTOOLS.out.filtered_vcf,
+        ch_reference
+    )
+
+    //
+    // MODULE: make pseudogenome alignment
+    //
+    ALIGNPSEUDOGENOMES (
+        VCF2PSEUDOGENOME.out.pseudogenome.map { pseudogenome -> pseudogenome[1] }.collect(),
+        ch_reference
+    )
+    ALIGNPSEUDOGENOMES.out.aligned_pseudogenomes
+        .branch {
+            aligned_pseudogenomes ->
+            ALIGNMENT_NUM_PASS: aligned_pseudogenomes[0].toInteger() >= 4
+            ALIGNMENT_NUM_FAIL: aligned_pseudogenomes[0].toInteger() < 4
+        }
+        .set { aligned_pseudogenomes_branch }
+
+    // Don't proceeed further if two few genonmes
+    aligned_pseudogenomes_branch.ALIGNMENT_NUM_FAIL.view { "Insufficient (${it[0]}) genomes after filtering to continue. Check results/pseudogenomes/low_quality_pseudogenomes.tsv for details"}
+
+    aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
+        .map{ it[1] }
+        .set { aligned_pseudogenomes }
 
     //
     // MODULE: MultiQC
