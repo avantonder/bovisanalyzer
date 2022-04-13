@@ -56,4 +56,26 @@ class WorkflowBovisanalyzer {
             System.exit(1)
         }
     }
+
+    public static String find_genome_size(mash_output) {
+        Matcher m = mash_output =~ /Estimated genome size: (.+)/
+        String genome_size = Float.parseFloat(m[0][1]).toInteger().toString() + 'b'
+        return genome_size
+    }
+
+    //
+    // Function that parses fastp json output file to get total number of reads after trimming
+    //
+    public static Integer getFastpReadsAfterFiltering(json_file) {
+        def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+        return json['after_filtering']['total_reads'].toInteger()
+    }
+
+    //
+    // Function that parses fastp json output file to get total number of reads before trimming
+    //
+    public static Integer getFastpReadsBeforeFiltering(json_file) {
+        def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+        return json['before_filtering']['total_reads'].toInteger()
+    }
 }

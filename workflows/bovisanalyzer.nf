@@ -11,7 +11,7 @@ WorkflowBovisanalyzer.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.reference,  params.kraken2db, brackendb]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
@@ -47,7 +47,7 @@ include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp
 include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
 include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
 include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
-include { TBPROFILER                  } from '../subworkflows/local/tbprofiler/main'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,13 +58,15 @@ include { TBPROFILER                  } from '../subworkflows/local/tbprofiler/m
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQSCAN                   } from '../modules/nf-core/modules/fastqscan/main'
-include { KRAKEN2_KRAKEN2             } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { BRACKEN_BRACKEN             } from '../modules/nf-core/modules/bracken/bracken/main'
-include { BWA_INDEX                   } from '../modules/nf-core/modules/bwa/index/main'
-include { BWA_MEM                     } from '../modules/nf-core/modules/bwa/mem/main'
-include { MULTIQC                     } from '../modules/nf-core/modules/multiqc/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' addParams( options: [publish_to_base: true] )
+include { FASTQSCAN                                               } from '../modules/nf-core/modules/fastqscan/main'
+include { KRAKEN2_KRAKEN2                                         } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { BRACKEN_BRACKEN                                         } from '../modules/nf-core/modules/bracken/bracken/main'
+include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
+include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
+include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
+include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
+include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' addParams( options: [publish_to_base: true] )
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,11 +108,49 @@ workflow BOVISANALYZER {
     // SUBWORKFLOW: Read QC and trim adapters
     //
     FASTQC_FASTP (
-        INPUT_CHECK.out.reads
+        INPUT_CHECK.out.reads,
+        params.save_trimmed_fail,
+        false
     )
-    ch_reads    = FASTQC_FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTQC_FASTP.out.fastqc_version.first())
-    ch_versions = ch_versions.mix(FASTQC_FASTP.out.fastp_version.first())
+    ch_variants_fastq = FASTQC_FASTP.out.reads
+    ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
+
+    //
+    // Filter empty FastQ files after adapter trimming
+    //
+    ch_fail_reads_multiqc = Channel.empty()
+    if (!params.skip_fastp) {
+        ch_variants_fastq
+            .join(FASTQC_FASTP.out.trim_json)
+            .map {
+                meta, reads, json ->
+                    pass = WorkflowBactmap.getFastpReadsAfterFiltering(json) > 0
+                    [ meta, reads, json, pass ]
+            }
+            .set { ch_pass_fail_reads }
+
+        ch_pass_fail_reads
+            .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
+            .set { ch_variants_fastq }
+
+        ch_pass_fail_reads
+            .map {
+                meta, reads, json, pass ->
+                if (!pass) {
+                    fail_mapped_reads[meta.id] = 0
+                    num_reads = WorkflowBactmap.getFastpReadsBeforeFiltering(json)
+                    return [ "$meta.id\t$num_reads" ]
+                }
+            }
+            .set { ch_pass_fail_reads }
+
+        MULTIQC_TSV_FAIL_READS (
+            ch_pass_fail_reads.collect(),
+            ['Sample', 'Reads before trimming'],
+            'fail_mapped_reads'
+        )
+        .set { ch_fail_reads_multiqc }
+    }
 
     //
     // MODULE: Run kraken2
@@ -153,7 +193,7 @@ workflow BOVISANALYZER {
     //
     // SUBWORKFLOW: TBprofiler
     //
-    TBPROFILER(
+    TBPROFILER_PROFILE(
             ch_reads
         )
     ch_versions = ch_versions.mix(TBPROFILER.out.versions.first())
