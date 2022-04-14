@@ -40,10 +40,10 @@ include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'            addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools' addParams( samtools_sort_options: modules['samtools_sort'], samtools_index_options : modules['samtools_index'], bam_stats_options: modules['bam_stats'])
-include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools' addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], bcftools_filter_options: modules['bcftools_filter'])
-include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'      addParams( mash_sketch_options: modules['mash_sketch'], rasusa_options: modules['rasusa'])
+include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
+include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools'
+include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools'
+include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'
 
 
 /*
@@ -63,7 +63,7 @@ include { TBPROFILER_PROFILE                                      } from '../mod
 include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
 include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' addParams( options: [publish_to_base: true] )
+include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
