@@ -200,7 +200,7 @@ workflow BOVISANALYZER {
     TBPROFILER_PROFILE(
             ch_variants_fastq
         )
-    ch_versions = ch_versions.mix(TBPROFILER.out.versions.first())
+    ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
     
     //
     // MODULE: Map reads
