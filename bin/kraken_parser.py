@@ -6,7 +6,7 @@ import numpy as np
 
 kraken_report_files = sorted(glob.glob('*.kraken2.report.txt'))
 
-species_abundance_files = sorted(glob.glob('*_output_species_abundance.txt'))
+species_abundance_files = sorted(glob.glob('*.tsv'))
 
 kraken_report_df = [pd.read_csv(f, sep='\t', header=None) for f in kraken_report_files]
 
@@ -14,7 +14,7 @@ kraken_report_df_filtered = [i.head(1).iloc[:,[5,1]] for i in kraken_report_df]
 
 species_abundance_df = [pd.read_csv(f, sep='\t') for f in species_abundance_files]
 
-species_abundance_names = [i.replace('_output_species_abundance.txt', '') for i in species_abundance_files]
+species_abundance_names = [i.replace('_S.tsv', '') for i in species_abundance_files]
 
 for a,b in zip(kraken_report_df_filtered, species_abundance_names):
 	a.rename(columns = {5: 'name', 1: b}, inplace=True)
