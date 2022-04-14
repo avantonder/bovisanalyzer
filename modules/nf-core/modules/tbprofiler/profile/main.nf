@@ -31,7 +31,7 @@ process TBPROFILER_PROFILE {
         $args \\
         --csv \\
         --txt \\
-        --no-trim \\
+        --no_trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
         $input_reads
