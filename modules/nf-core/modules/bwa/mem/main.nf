@@ -10,7 +10,6 @@ process BWA_MEM {
     input:
     tuple val(meta), path(reads)
     path  index
-    val   sort_bam
 
     output:
     tuple val(meta), path("*.bam"), emit: bam
