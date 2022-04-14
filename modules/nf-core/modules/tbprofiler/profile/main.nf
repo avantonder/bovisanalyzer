@@ -29,6 +29,9 @@ process TBPROFILER_PROFILE {
     tb-profiler \\
         profile \\
         $args \\
+        --csv \\
+        --txt \\
+        --no-trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
         $input_reads
