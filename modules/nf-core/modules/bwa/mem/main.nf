@@ -32,7 +32,7 @@ process BWA_MEM {
         -t $task.cpus \\
         \$INDEX \\
         $reads \\
-        | samtools view $args2 --threads $task.cpus -o ${prefix}.bam -
+        | samtools view $args2 --threads $task.cpus -bhS -o ${prefix}.bam -
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
