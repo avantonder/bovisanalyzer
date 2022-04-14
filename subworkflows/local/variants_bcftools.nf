@@ -2,8 +2,8 @@
  * Variant calling and downstream processing for BCFTools
  */
 
-include { BCFTOOLS_MPILEUP } from '../modules/nf-core/modules/bcftools/mpileup/main'
-include { BCFTOOLS_FILTER  } from  '../modules/nf-core/modules/bcftools/filter/main'
+include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/modules/bcftools/mpileup/main'
+include { BCFTOOLS_FILTER  } from '../../modules/nf-core/modules/bcftools/filter/main'
 
 
 workflow VARIANTS_BCFTOOLS {

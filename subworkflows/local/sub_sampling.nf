@@ -2,8 +2,8 @@
 // Sub-sampling subworkflow
 //
 
-include { MASH_SKETCH      } from '../modules/nf-core/software/mash/sketch/main'
-include { RASUSA           } from '../modules/nf-core/software/rasusa/main'
+include { MASH_SKETCH      } from '../../modules/nf-core/software/mash/sketch/main'
+include { RASUSA           } from '../../modules/nf-core/software/rasusa/main'
 
 workflow SUB_SAMPLING {
     take:
