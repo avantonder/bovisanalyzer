@@ -7,9 +7,9 @@ params.samtools_sort_options = [:]
 params.samtools_index_options = [:]
 params.bam_stats_options = [:]
 
-include { SAMTOOLS_SORT      } from '../modules/nf-core/modules/samtools/sort/main'  addParams( options: params.samtools_sort_options )
-include { SAMTOOLS_INDEX     } from '../modules/nf-core/modules/samtools/index/main' addParams( options: params.samtools_index_options )
-include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'                       addParams( options: params.bam_stats_options )
+include { SAMTOOLS_SORT      } from '../modules/nf-core/modules/samtools/sort/main'
+include { SAMTOOLS_INDEX     } from '../modules/nf-core/modules/samtools/index/main'
+include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'
 
 workflow BAM_SORT_SAMTOOLS {
     take:

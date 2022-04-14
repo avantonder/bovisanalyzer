@@ -4,8 +4,8 @@
 params.mash_sketch_options = [:]
 params.rasusa_options      = [:]
 
-include { MASH_SKETCH      } from '../modules/nf-core/software/mash/sketch/main' addParams( mash_sketch: params.mash_sketch_options )
-include { RASUSA           } from '../modules/nf-core/software/rasusa/main'      addParams( options: params.rasusa_options)
+include { MASH_SKETCH      } from '../modules/nf-core/software/mash/sketch/main'
+include { RASUSA           } from '../modules/nf-core/software/rasusa/main'
 
 workflow SUB_SAMPLING {
     take:
