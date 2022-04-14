@@ -3,10 +3,6 @@
  * from https://github.com/nf-core/viralrecon/blob/dev/subworkflows/nf-core/bam_sort_samtools.nf
  */
 
-params.samtools_sort_options = [:]
-params.samtools_index_options = [:]
-params.bam_stats_options = [:]
-
 include { SAMTOOLS_SORT      } from '../modules/nf-core/modules/samtools/sort/main'
 include { SAMTOOLS_INDEX     } from '../modules/nf-core/modules/samtools/index/main'
 include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'

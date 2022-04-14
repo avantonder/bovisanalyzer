@@ -1,8 +1,6 @@
 //
 // Sub-sampling subworkflow
 //
-params.mash_sketch_options = [:]
-params.rasusa_options      = [:]
 
 include { MASH_SKETCH      } from '../modules/nf-core/software/mash/sketch/main'
 include { RASUSA           } from '../modules/nf-core/software/rasusa/main'

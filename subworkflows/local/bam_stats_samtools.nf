@@ -3,8 +3,6 @@
  * From https://github.com/nf-core/viralrecon/blob/dev/subworkflows/nf-core/bam_stats_samtools.nf
  */
 
-params.options = [:]
-
 include { SAMTOOLS_STATS    } from '../modules/nf-core/modules/samtools/stats/main'
 include { SAMTOOLS_IDXSTATS } from '../modules/nf-core/modules/samtools/idxstats/main'
 include { SAMTOOLS_FLAGSTAT } from '../modules/nf-core/modules/samtools/flagstat/main'
