@@ -155,14 +155,18 @@ workflow BOVISANALYZER {
     //
     // MODULE: Run kraken2
     //  
-    KRAKEN2_KRAKEN2 (
-            ch_reads,
-            ch_kraken2db
-        )
-    ch_kraken2_bracken       = KRAKEN2_KRAKEN2.out.txt
-    ch_kraken2_krakenparse   = KRAKEN2_KRAKEN2.out.txt
-    ch_versions     = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
-
+    ch_kraken2_multiqc = Channel.empty()
+    if (!params.skip_kraken2) {
+        KRAKEN2_KRAKEN2 (
+                ch_variants_fastq,
+                ch_kraken2db
+            )
+        ch_kraken2_bracken       = KRAKEN2_KRAKEN2.out.txt
+        ch_kraken2_krakenparse   = KRAKEN2_KRAKEN2.out.txt
+        ch_kraken2_multiqc       = KRAKEN2_KRAKEN2.out.txt
+        ch_versions              = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
+    }
+    
     //
     // MODULE: Run bracken
     //
@@ -186,15 +190,15 @@ workflow BOVISANALYZER {
     // SUBWORKFLOW: Subsample reads
     //
     SUB_SAMPLING(
-            ch_reads
+            ch_variants_fastq
         )
-    ch_reads = SUB_SAMPLING.out.reads
+    ch_variants_fastq = SUB_SAMPLING.out.reads
 
     //
     // SUBWORKFLOW: TBprofiler
     //
     TBPROFILER_PROFILE(
-            ch_reads
+            ch_variants_fastq
         )
     ch_versions = ch_versions.mix(TBPROFILER.out.versions.first())
     
@@ -202,7 +206,7 @@ workflow BOVISANALYZER {
     // MODULE: Map reads
     //
     BWA_MEM (
-        ch_reads,
+        ch_variants_fastq,
         BWA_INDEX.out.index
     )
     ch_versions = ch_versions.mix(BWA_MEM.out.versions.first())
@@ -213,7 +217,8 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_versions = ch_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first())
+    ch_flagstat_multiqc = BAM_SORT_SAMTOOLS.out.flagstat
+    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first())
 
     //
     // SUBWORKFLOW: Call variants
@@ -222,7 +227,8 @@ workflow BOVISANALYZER {
         BAM_SORT_SAMTOOLS.out.bam,
         ch_reference
     )
-    ch_versions = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
+    ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
+    ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
     //
     // MODULE: Make pseudogenome from VCF
@@ -264,21 +270,25 @@ workflow BOVISANALYZER {
     //
     // MODULE: MultiQC
     //
-    workflow_summary    = WorkflowBovisanalyzer.paramsSummaryMultiqc(workflow, summary_params)
-    ch_workflow_summary = Channel.value(workflow_summary)
+    if (!params.skip_multiqc) {
+        workflow_summary    = WorkflowBovisanalyzer.paramsSummaryMultiqc(workflow, summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
 
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-
-    MULTIQC (
-        ch_multiqc_files.collect()
-    )
-    multiqc_report = MULTIQC.out.report.toList()
-    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+        MULTIQC (
+            ch_multiqc_config,
+            ch_multiqc_custom_config,
+            CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_fail_reads_multiqc.ifEmpty([]),
+            FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
+            FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
+            ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
+        )
+        multiqc_report = MULTIQC.out.report.toList()
+        ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+    }
 }
 
 /*
