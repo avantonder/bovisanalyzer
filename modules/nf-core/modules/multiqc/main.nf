@@ -7,7 +7,16 @@ process MULTIQC {
         'quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0' }"
 
     input:
-    path multiqc_files
+    path 'multiqc_config.yaml'
+    path multiqc_custom_config
+    path software_versions
+    path workflow_summary
+    path fail_reads_summary
+    path ('fastqc/*')
+    path ('fastp/*')
+    path ('kraken2/*')
+    path ('variants/*')
+    path ('variants/*')
 
     output:
     path "*multiqc_report.html", emit: report
