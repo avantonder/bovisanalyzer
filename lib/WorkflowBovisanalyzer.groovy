@@ -3,6 +3,7 @@
 //
 
 import groovy.json.JsonSlurper
+import java.util.regex.Matcher
 
 class WorkflowBovisanalyzer {
 
@@ -55,6 +56,7 @@ class WorkflowBovisanalyzer {
         return yaml_file_text
     }
 
+    // Function to extract genome size from mash stat file
     public static String find_genome_size(mash_output) {
         Matcher m = mash_output =~ /Estimated genome size: (.+)/
         String genome_size = Float.parseFloat(m[0][1]).toInteger().toString() + 'b'

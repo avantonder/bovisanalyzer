@@ -19,7 +19,7 @@ workflow SUB_SAMPLING {
         MASH_SKETCH (
             reads
         )
-        genome_size = MASH_SKETCH.out.stats.map { meta, file -> [meta, WorkflowBactmap.find_genome_size(file.text)]}
+        genome_size = MASH_SKETCH.out.stats.map { meta, file -> [meta, WorkflowBovisanalyzer.find_genome_size(file.text)]}
         reads_and_genome_size = reads.combine(genome_size, by: 0)
     }
 
