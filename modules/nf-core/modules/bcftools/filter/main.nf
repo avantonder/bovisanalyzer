@@ -27,7 +27,7 @@ process BCFTOOLS_FILTER {
 
     script:
     def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     bcftools filter \\
         --output ${prefix}.vcf.gz \\
