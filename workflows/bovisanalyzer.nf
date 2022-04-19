@@ -184,7 +184,7 @@ workflow BOVISANALYZER {
             ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
             ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
         )
-    ch_versions = ch_versions.mix(KRAKENPARSE.out.version.first())
+    ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
     //
     // SUBWORKFLOW: Subsample reads
