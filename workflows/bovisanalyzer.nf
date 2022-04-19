@@ -48,7 +48,6 @@ include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_sam
 include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools'
 include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'
 
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
@@ -76,6 +75,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../mod
 
 // Info required for completion email and summary
 def multiqc_report = []
+def fail_mapped_reads = [:]
 
 workflow BOVISANALYZER {
 
@@ -299,7 +299,7 @@ workflow BOVISANALYZER {
 
 workflow.onComplete {
     if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
     }
     NfcoreTemplate.summary(workflow, params, log)
 }
