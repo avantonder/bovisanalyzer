@@ -15,7 +15,7 @@ process MULTIQC {
     path ('fastqc/*')
     path ('fastp/*')
     path ('kraken2/*')
-    path ('variants/*')
+    path ('samtools/*')
     path ('variants/*')
 
     output:
