@@ -110,7 +110,7 @@ workflow BOVISANALYZER {
     FASTQC_FASTP (
         INPUT_CHECK.out.reads,
         params.save_trimmed_fail,
-        false
+        true
     )
     ch_variants_fastq = FASTQC_FASTP.out.reads
     ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
