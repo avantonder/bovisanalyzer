@@ -23,13 +23,14 @@ process KRAKENPARSE {
 
     output:
     path "Bracken_species_composition.tsv", emit: composition
-    path "*.version.txt",                   emit: version
+    path  "versions.yml"                  , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bacQC/bin/
-    def software = getSoftwareName(task.process)
     """
     kraken_parser.py
-
-    echo '1.0' > ${software}.version.txt 
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        echo '1.0'
+    END_VERSIONS 
     """
 }
