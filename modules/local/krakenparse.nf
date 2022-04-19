@@ -26,11 +26,12 @@ process KRAKENPARSE {
     path  "versions.yml"                  , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bacQC/bin/
+    def parser_version = '1.0'
     """
     kraken_parser.py
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        echo '1.0'
+        kraken_parser.py: ${parser_version}
     END_VERSIONS 
     """
 }
