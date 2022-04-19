@@ -270,25 +270,23 @@ workflow BOVISANALYZER {
     //
     // MODULE: MultiQC
     //
-    if (!params.skip_multiqc) {
-        workflow_summary    = WorkflowBovisanalyzer.paramsSummaryMultiqc(workflow, summary_params)
-        ch_workflow_summary = Channel.value(workflow_summary)
+    workflow_summary    = WorkflowBovisanalyzer.paramsSummaryMultiqc(workflow, summary_params)
+    ch_workflow_summary = Channel.value(workflow_summary)
 
-        MULTIQC (
-            ch_multiqc_config,
-            ch_multiqc_custom_config,
-            CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
-            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-            ch_fail_reads_multiqc.ifEmpty([]),
-            FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
-            FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
-            ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
-        )
-        multiqc_report = MULTIQC.out.report.toList()
-        ch_versions    = ch_versions.mix(MULTIQC.out.versions)
-    }
+    MULTIQC (
+        ch_multiqc_config,
+        ch_multiqc_custom_config,
+        CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+        ch_fail_reads_multiqc.ifEmpty([]),
+        FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
+        FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
+        ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
+    )
+    multiqc_report = MULTIQC.out.report.toList()
+    ch_versions    = ch_versions.mix(MULTIQC.out.versions)
 }
 
 /*
