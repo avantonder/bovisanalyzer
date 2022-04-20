@@ -204,18 +204,14 @@ workflow BOVISANALYZER {
     TBPROFILER_PROFILE(
             ch_variants_fastq
         )
-    ch_tbprofiler_json = TBPROFILER_PROFILE.out.json
-    ch_tbprofiler_txt  = TBPROFILER_PROFILE.out.txt
-    ch_tbprofiler_csv  = TBPROFILER_PROFILE.out.csv
-    ch_versions        = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+    ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
+    ch_versions           = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
 
     //
     // MODULE: Collate TB-profiler outputs
     //
     TBPROFILER_COLLATE(
-            ch_tbprofiler_json.collect{it[1]}.ifEmpty([])
-            ch_tbprofiler_txt.collect{it[1]}.ifEmpty([])
-            ch_tbprofiler_csv.collect{it[1]}.ifEmpty([])
+            ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
         )
     
     //
