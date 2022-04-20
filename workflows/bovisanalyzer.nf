@@ -238,7 +238,7 @@ workflow BOVISANALYZER {
         BWA_MEM.out.bam
     )
     ch_flagstat_multiqc = BAM_SORT_SAMTOOLS.out.flagstat
-    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first())
+    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
     // SUBWORKFLOW: Call variants
