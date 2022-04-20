@@ -113,7 +113,7 @@ workflow BOVISANALYZER {
     FASTQC_FASTP (
         INPUT_CHECK.out.reads,
         params.save_trimmed_fail,
-        true
+        false
     )
     ch_variants_fastq = FASTQC_FASTP.out.reads
     ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
@@ -196,6 +196,7 @@ workflow BOVISANALYZER {
             ch_variants_fastq
         )
     ch_variants_fastq = SUB_SAMPLING.out.reads
+    ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
 
     //
     // MODULE: TBprofiler
