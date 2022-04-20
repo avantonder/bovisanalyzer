@@ -7,11 +7,21 @@ process MULTIQC {
         'quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0' }"
 
     input:
-    path multiqc_files
+    path 'multiqc_config.yaml'
+    path multiqc_custom_config
+    path software_versions
+    path workflow_summary
+    path fail_reads_summary
+    path ('fastqc/*')
+    path ('fastp/*')
+    path ('kraken2/*')
+    path ('samtools/*')
+    path ('variants/*')
 
     output:
     path "*multiqc_report.html", emit: report
     path "*_data"              , emit: data
+    path "*variants_metrics_mqc.csv", optional:true, emit: csv_variants
     path "*_plots"             , optional:true, emit: plots
     path "versions.yml"        , emit: versions
 
@@ -20,8 +30,9 @@ process MULTIQC {
 
     script:
     def args = task.ext.args ?: ''
+    def custom_config = multiqc_custom_config ? "--config $multiqc_custom_config" : ''
     """
-    multiqc -f $args .
+    multiqc -f $args $custom_config .
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

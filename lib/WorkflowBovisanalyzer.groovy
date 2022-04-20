@@ -2,16 +2,28 @@
 // This file holds several functions specific to the workflow/bovisanalyzer.nf in the avantonder/bovisanalyzer pipeline
 //
 
+import groovy.json.JsonSlurper
+import java.util.regex.Matcher
+
 class WorkflowBovisanalyzer {
 
     //
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-        genomeExistsError(params, log)
 
-        if (!params.fasta) {
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (!params.reference) {
+            log.error "Reference fasta file not specified! e.g. '--reference genome.fa' or via a detectable config file."
+            System.exit(1)
+        }
+
+        if (!params.kraken2db) {
+            log.error "kraken2 database not specified! e.g. '--kraken2db minikraken2_v1_8GB' or via a detectable config file."
+            System.exit(1)
+        }
+
+        if (!params.brackendb) {
+            log.error "bracken database not specified! e.g. '--brackendb minikraken2_v1_8GB/database100mers.kmer_distrib' or via a detectable config file."
             System.exit(1)
         }
     }
@@ -43,17 +55,26 @@ class WorkflowBovisanalyzer {
         return yaml_file_text
     }
 
+    // Function to extract genome size from mash stat file
+    public static String find_genome_size(mash_output) {
+        Matcher m = mash_output =~ /Estimated genome size: (.+)/
+        String genome_size = Float.parseFloat(m[0][1]).toInteger().toString() + 'b'
+        return genome_size
+    }
+
     //
-    // Exit pipeline if incorrect --genome key provided
+    // Function that parses fastp json output file to get total number of reads after trimming
     //
-    private static void genomeExistsError(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome keys are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
-        }
+    public static Integer getFastpReadsAfterFiltering(json_file) {
+        def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+        return json['after_filtering']['total_reads'].toInteger()
+    }
+
+    //
+    // Function that parses fastp json output file to get total number of reads before trimming
+    //
+    public static Integer getFastpReadsBeforeFiltering(json_file) {
+        def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+        return json['before_filtering']['total_reads'].toInteger()
     }
 }
