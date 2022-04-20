@@ -1,5 +1,4 @@
 process TBPROFILER_COLLATE {
-    tag "$meta.id"
     label 'process_low'
 
     conda (params.enable_conda ? "bioconda::tb-profiler=3.0.8" : null)
