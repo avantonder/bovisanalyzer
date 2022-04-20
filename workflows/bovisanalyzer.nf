@@ -207,8 +207,7 @@ workflow BOVISANALYZER {
     ch_tbprofiler_json = TBPROFILER_PROFILE.out.json
     ch_tbprofiler_txt  = TBPROFILER_PROFILE.out.txt
     ch_tbprofiler_csv  = TBPROFILER_PROFILE.out.csv
-
-    ch_versions           = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+    ch_versions        = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
 
     //
     // MODULE: Collate TB-profiler outputs
