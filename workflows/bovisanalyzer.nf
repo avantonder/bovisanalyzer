@@ -39,6 +39,7 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
+include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 
@@ -175,7 +176,7 @@ workflow BOVISANALYZER {
             ch_brackendb
         )
     ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
-    ch_versions   = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
+    ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
 
     //
     // MODULE: Run krakenparse
@@ -200,7 +201,15 @@ workflow BOVISANALYZER {
     TBPROFILER_PROFILE(
             ch_variants_fastq
         )
-    ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+    ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
+    ch_versions           = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+
+    //
+    // MODULE: Collate TB-profiler outputs
+    //
+    TBPROFILER_COLLATE(
+            ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
+        )
     
     //
     // MODULE: Map reads
