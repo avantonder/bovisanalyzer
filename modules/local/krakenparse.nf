@@ -25,7 +25,7 @@ process KRAKENPARSE {
     path "Bracken_species_composition.tsv", emit: composition
     path  "versions.yml"                  , emit: versions
     
-    script: // This script is bundled with the pipeline in avantonder/bacQC/bin/
+    script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
     def parser_version = '1.0'
     """
     kraken_parser.py

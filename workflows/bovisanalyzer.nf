@@ -26,6 +26,7 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt", checkIfExists: true)
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
@@ -40,6 +41,7 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
+include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 
@@ -188,7 +190,7 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
     //
-    // SUBWORKFLOW: Subsample reads
+    // MODULE: Subsample reads
     //
     SUB_SAMPLING(
             ch_variants_fastq
@@ -196,7 +198,7 @@ workflow BOVISANALYZER {
     ch_variants_fastq = SUB_SAMPLING.out.reads
 
     //
-    // SUBWORKFLOW: TBprofiler
+    // MODULE: TBprofiler
     //
     TBPROFILER_PROFILE(
             ch_variants_fastq
@@ -210,6 +212,14 @@ workflow BOVISANALYZER {
     TBPROFILER_COLLATE(
             ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
         )
+    
+    //
+    // MODULE: vsnp_spoligotype.py
+    //
+    SPOLIGOTYPE(
+            ch_variants_fastq
+        )
+    ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
     
     //
     // MODULE: Map reads
