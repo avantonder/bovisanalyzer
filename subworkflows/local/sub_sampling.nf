@@ -10,6 +10,9 @@ workflow SUB_SAMPLING {
     reads // channel: INPUT_CHECK or FASTP
 
     main:
+
+    ch_versions = Channel.empty()
+    
     //If genome size is not defined
     if (params.genome_size) {
         reads_and_genome_size = reads.combine([params.genome_size])
