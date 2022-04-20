@@ -28,22 +28,8 @@ include { BOVISANALYZER } from './workflows/bovisanalyzer'
 //
 // WORKFLOW: Run main avantonder/bovisanalyzer analysis pipeline
 //
-workflow NFCORE_BOVISANALYZER {
-    BOVISANALYZER ()
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// WORKFLOW: Execute a single named workflow for the pipeline
-// See: https://github.com/nf-core/rnaseq/issues/619
-//
 workflow {
-    NFCORE_BOVISANALYZER ()
+    BOVISANALYZER ()
 }
 
 /*
