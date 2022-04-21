@@ -6,7 +6,7 @@ process TBPROFILER_COLLATE {
         'https://depot.galaxyproject.org/singularity/tb-profiler:4.1.1--pypyh5e36f6f_1' :
         'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
 
-    input:
+    take:
     ch_tbprofiler
     //path ('tbprofiler/*')
     //tuple val(meta), path(csv), path(json), path(txt)
