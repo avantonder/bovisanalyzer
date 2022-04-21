@@ -1,5 +1,4 @@
 process REMOVE_BLOCKS {
-    tag "$meta.id"
     label 'process_medium'
 
     conda (params.enable_conda ? "conda-forge::python=2.7.9" : null)
