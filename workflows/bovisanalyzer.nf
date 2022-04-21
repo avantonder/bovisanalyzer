@@ -45,6 +45,7 @@ include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collat
 include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
+include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
 
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
