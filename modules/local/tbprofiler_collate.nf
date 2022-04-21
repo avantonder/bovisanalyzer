@@ -8,7 +8,7 @@ process TBPROFILER_COLLATE {
 
     input:
 
-    profile
+    path profile
     //path ('tbprofiler/*')
     //tuple val(meta), path(csv), path(json), path(txt)
 
