@@ -68,6 +68,7 @@ include { BRACKEN_BRACKEN                                         } from '../mod
 include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
 include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
 include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
+include { SNPSITES                                                } from '../modules/nf-core/modules/snpsites/main'
 include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
