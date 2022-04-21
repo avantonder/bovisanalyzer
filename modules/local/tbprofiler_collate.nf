@@ -27,8 +27,7 @@ process TBPROFILER_COLLATE {
     def args = task.ext.args   ?: ''
     """
     tb-profiler \\
-        collate \\  
-        $args \\
-        --dir .
+        collate --dir .\\  
+        $args      
     """
 }
