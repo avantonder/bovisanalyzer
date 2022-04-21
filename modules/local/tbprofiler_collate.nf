@@ -7,7 +7,10 @@ process TBPROFILER_COLLATE {
         'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
 
     input:
-    path ('tbprofiler/*')
+    //path ('tbprofiler/*')
+    path txt
+    path csv
+    path json
 
     output:
     path("tbprofiler.variants.txt")     , emit: variants
