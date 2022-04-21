@@ -24,10 +24,11 @@ process TBPROFILER_COLLATE {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args   ?: ''  //--dir .
+    def args = task.ext.args   ?: ''
     """
     tb-profiler \\
         collate \\  
-        $args
+        $args \\
+        --dir .
     """
 }

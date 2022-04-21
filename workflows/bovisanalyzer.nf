@@ -26,8 +26,9 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt", checkIfExists: true)
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",    checkIfExists: true)
+ch_tab                   = file("$projectDir/assets/AF2122_region_exclude", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",    checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
@@ -291,6 +292,23 @@ workflow BOVISANALYZER {
     aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
         .map{ it[1] }
         .set { aligned_pseudogenomes }
+
+    //
+    // MODULE: Mask alignment
+    //
+    REMOVE_BLOCKS (
+        aligned_pseudogenomes
+        ch_tab
+    )
+    ch_versions = ch_versions.mix(REMOVE_BLOCKS.out.versions.first())
+
+    //
+    // MODULE: Extract SNPs from masked alignment
+    //
+    SNPSITES (
+        REMOVE_BLOCKS.out.fasta
+    )
+    ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
 
     //
     // MODULE: Collate software versions
