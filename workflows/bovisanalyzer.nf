@@ -297,7 +297,7 @@ workflow BOVISANALYZER {
     // MODULE: Mask alignment
     //
     REMOVE_BLOCKS (
-        ALIGNPSEUDOGENOMES.out.aligned_pseudogenomes
+        aligned_pseudogenomes,
         ch_tab
     )
     ch_versions = ch_versions.mix(REMOVE_BLOCKS.out.versions.first())
