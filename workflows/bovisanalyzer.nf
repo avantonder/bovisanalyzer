@@ -214,9 +214,9 @@ workflow BOVISANALYZER {
         .map { meta, reads, csv, json, txt -> [ meta, csv, json, txt ] }
         .set { ch_tbprofiler }
 
-    ch_variants_fastq
-        .map { meta, reads, csv, json, txt -> [ meta, reads ] }
-        .set { ch_variants_fastq }
+    //ch_variants_fastq
+    //    .map { meta, reads, csv, json, txt -> [ meta, reads ] }
+    //    .set { ch_variants_fastq }
 
     //
     // MODULE: Collate TB-profiler outputs
