@@ -8,7 +8,7 @@ process TBPROFILER_COLLATE {
 
     input:
 
-    path profile
+    path json
     //path ('tbprofiler/*')
     //tuple val(meta), path(csv), path(json), path(txt)
 
@@ -24,10 +24,10 @@ process TBPROFILER_COLLATE {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args   ?: ''
+    def args = task.ext.args   ?: ''  //--dir .
     """
     tb-profiler \\
-        collate --dir .\\
+        collate \\  
         $args
     """
 }
