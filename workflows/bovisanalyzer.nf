@@ -205,9 +205,8 @@ workflow BOVISANALYZER {
     TBPROFILER_PROFILE(
             ch_variants_fastq
         )
-    ch_tbprofiler
-        .out
-        .csv
+    ch_variants_fastq
+        .join(TBPROFILER_PROFILE.out.csv)
         .join(TBPROFILER_PROFILE.out.json)
         .join(TBPROFILER_PROFILE.out.txt)
         .map { meta, csv, json, txt -> [ meta, csv, json, txt ] }
