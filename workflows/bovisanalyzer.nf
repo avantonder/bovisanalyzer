@@ -26,6 +26,7 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+ch_tbdb                  = file("$projectDir/assets/tbdb",    checkIfExists: true)
 ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",    checkIfExists: true)
 ch_tab                   = file("$projectDir/assets/AF2122_region_exclude", checkIfExists: true)
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",    checkIfExists: true)
@@ -206,6 +207,7 @@ workflow BOVISANALYZER {
     //
     ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
+            ch_tbdb,
             ch_variants_fastq
         )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
