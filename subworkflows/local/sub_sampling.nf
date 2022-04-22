@@ -10,6 +10,9 @@ workflow SUB_SAMPLING {
     reads // channel: INPUT_CHECK or FASTP
 
     main:
+
+    ch_versions = Channel.empty()
+    
     //If genome size is not defined
     if (params.genome_size) {
         reads_and_genome_size = reads.combine([params.genome_size])
@@ -17,16 +20,18 @@ workflow SUB_SAMPLING {
         MASH_SKETCH (
             reads
         )
-        genome_size = MASH_SKETCH.out.stats.map { meta, file -> [meta, WorkflowBovisanalyzer.find_genome_size(file.text)]}
+        genome_size           = MASH_SKETCH.out.stats.map { meta, file -> [meta, WorkflowBovisanalyzer.find_genome_size(file.text)]}
         reads_and_genome_size = reads.combine(genome_size, by: 0)
+        ch_versions           = ch_versions.mix(MASH_SKETCH.out.versions.first())
     }
 
     RASUSA (
         reads_and_genome_size,
         params.subsampling_depth_cutoff
     )
+    ch_versions = ch_versions.mix(RASUSA.out.versions.first())
 
     emit:
     reads   = RASUSA.out.reads      // channel: [ reads ]
-    version = params.genome_size ? RASUSA.out.version : MASH_SKETCH.out.version.mix(RASUSA.out.version.first().ifEmpty(null)) //    path: *.version.txt
+    versions = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }

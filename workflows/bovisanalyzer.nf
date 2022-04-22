@@ -26,7 +26,9 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",    checkIfExists: true)
+ch_tab                   = file("$projectDir/assets/AF2122_region_exclude", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",    checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
@@ -40,8 +42,10 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
+include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
+include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
 
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
@@ -64,6 +68,7 @@ include { BRACKEN_BRACKEN                                         } from '../mod
 include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
 include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
 include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
+include { SNPSITES                                                } from '../modules/nf-core/modules/snpsites/main'
 include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
 include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
@@ -111,7 +116,7 @@ workflow BOVISANALYZER {
     FASTQC_FASTP (
         INPUT_CHECK.out.reads,
         params.save_trimmed_fail,
-        true
+        false
     )
     ch_variants_fastq = FASTQC_FASTP.out.reads
     ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
@@ -188,21 +193,34 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
     //
-    // SUBWORKFLOW: Subsample reads
+    // MODULE: Subsample reads
     //
     SUB_SAMPLING(
             ch_variants_fastq
         )
     ch_variants_fastq = SUB_SAMPLING.out.reads
+    ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
 
     //
-    // SUBWORKFLOW: TBprofiler
+    // MODULE: TBprofiler
     //
+    ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
             ch_variants_fastq
         )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
-    ch_versions           = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+    ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
+    
+    //ch_variants_fastq
+    //    .join(TBPROFILER_PROFILE.out.csv)
+    //    .join(TBPROFILER_PROFILE.out.json)
+    //    .join(TBPROFILER_PROFILE.out.txt)
+    //    .map { meta, reads, csv, json, txt -> [ meta, csv, json, txt ] }
+    //    .set { ch_tbprofiler }
+
+    //ch_variants_fastq
+    //    .map { meta, reads, csv, json, txt -> [ meta, reads ] }
+    //    .set { ch_variants_fastq }
 
     //
     // MODULE: Collate TB-profiler outputs
@@ -210,6 +228,14 @@ workflow BOVISANALYZER {
     TBPROFILER_COLLATE(
             ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
         )
+    
+    //
+    // MODULE: vsnp_spoligotype.py
+    //
+    SPOLIGOTYPE(
+            ch_variants_fastq
+        )
+    ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
     
     //
     // MODULE: Map reads
@@ -227,7 +253,7 @@ workflow BOVISANALYZER {
         BWA_MEM.out.bam
     )
     ch_flagstat_multiqc = BAM_SORT_SAMTOOLS.out.flagstat
-    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.samtools_version.first())
+    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
     // SUBWORKFLOW: Call variants
@@ -268,6 +294,23 @@ workflow BOVISANALYZER {
     aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
         .map{ it[1] }
         .set { aligned_pseudogenomes }
+
+    //
+    // MODULE: Mask alignment
+    //
+    REMOVE_BLOCKS (
+        aligned_pseudogenomes,
+        ch_tab
+    )
+    ch_versions = ch_versions.mix(REMOVE_BLOCKS.out.versions.first())
+
+    //
+    // MODULE: Extract SNPs from masked alignment
+    //
+    SNPSITES (
+        REMOVE_BLOCKS.out.fasta
+    )
+    ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
 
     //
     // MODULE: Collate software versions
