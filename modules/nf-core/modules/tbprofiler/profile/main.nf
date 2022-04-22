@@ -33,7 +33,7 @@ process TBPROFILER_PROFILE {
     prefix   = task.ext.prefix ?: "${meta.id}"
     def input_reads = meta.single_end ? "--read1 $reads" : "--read1 ${reads[0]} --read2 ${reads[1]}"
     """
-    rm /usr/local/share/tbprofiler/tbdb.*
+    su rm /usr/local/share/tbprofiler/tbdb.*
     
     tb-profiler \\
         load_library tbdb
