@@ -26,13 +26,13 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdb.barcode.bed",    checkIfExists: true)
-ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdb.bed",            checkIfExists: true)
-ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdb.dr.json",        checkIfExists: true)
-ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdb.fasta",          checkIfExists: true)
-ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdb.gff",             checkIfExists: true)
-ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdb.variables.json", checkIfExists: true)
-ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdb.version.json",   checkIfExists: true)
+ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",    checkIfExists: true)
+ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdbnew.bed",            checkIfExists: true)
+ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdbnew.dr.json",        checkIfExists: true)
+ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",          checkIfExists: true)
+ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
+ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
+ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
 ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",       checkIfExists: true)
 ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
