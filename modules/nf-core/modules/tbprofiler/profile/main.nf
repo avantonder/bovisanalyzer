@@ -41,7 +41,7 @@ process TBPROFILER_PROFILE {
         --no_trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
-        --external_db ./tbdbnew
+        --external_db ./tbdbnew \\
         $input_reads
 
     cat <<-END_VERSIONS > versions.yml
