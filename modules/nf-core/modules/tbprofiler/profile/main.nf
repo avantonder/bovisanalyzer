@@ -8,7 +8,13 @@ process TBPROFILER_PROFILE {
         'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
 
     input:
-    path database
+    path tbdb_barcode
+    path tbdb_bed
+    path tbdb_drjson
+    path tbdb_fasta
+    path tbdb_gff
+    path tbdb_varjson
+    path tbdb_verjson
     tuple val(meta), path(reads)
 
     output:
@@ -28,7 +34,7 @@ process TBPROFILER_PROFILE {
     def input_reads = meta.single_end ? "--read1 $reads" : "--read1 ${reads[0]} --read2 ${reads[1]}"
     """
     tb-profiler \\
-        load_library '${database}'
+        load_library tbdb
     
     tb-profiler \\
         profile \\
