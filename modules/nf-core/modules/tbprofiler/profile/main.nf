@@ -34,9 +34,6 @@ process TBPROFILER_PROFILE {
     def input_reads = meta.single_end ? "--read1 $reads" : "--read1 ${reads[0]} --read2 ${reads[1]}"
     """
     tb-profiler \\
-        load_library tbdbnew
-    
-    tb-profiler \\
         profile \\
         $args \\
         --csv \\
@@ -44,6 +41,7 @@ process TBPROFILER_PROFILE {
         --no_trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
+        --external_db ./tbdbnew
         $input_reads
 
     cat <<-END_VERSIONS > versions.yml
