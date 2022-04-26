@@ -197,6 +197,7 @@ workflow BOVISANALYZER {
             ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
             ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
         )
+    ch_kraken_metadata = KRAKENPARSE.out.composition
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
     //
@@ -231,14 +232,36 @@ workflow BOVISANALYZER {
     TBPROFILER_COLLATE(
             ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
         )
-    
+    ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
+
     //
     // MODULE: vsnp_spoligotype.py
     //
     SPOLIGOTYPE(
             ch_variants_fastq
         )
+    ch_spoligo_spoligoparse = SPOLIGOTYPE.out.txt
     ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
+
+    //
+    // MODULE: Run spoligoparse
+    //
+    SPOLIGOPARSE (
+            ch_spoligo_spoligoparse.collect{it[1]}.ifEmpty([])
+        )
+    ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
+    ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
+    
+    //
+    // MODULE: Run metadata_collate
+    //
+    METADATA_COLLATE (
+            ch_kraken_metadata,
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata
+
+        )
+    ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
     
     //
     // MODULE: Map reads
