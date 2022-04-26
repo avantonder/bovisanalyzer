@@ -50,6 +50,8 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
+include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
+include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
