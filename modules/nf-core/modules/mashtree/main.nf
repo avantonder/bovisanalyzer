@@ -23,7 +23,6 @@ process MASHTREE {
     mashtree \\
         $args \\
         --numcpus $task.cpus \\
-        --outmatrix mashtree_matrix.tsv \\
         --outtree mashtree.dnd \\
         $seqs
     cat <<-END_VERSIONS > versions.yml
