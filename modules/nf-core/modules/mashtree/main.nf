@@ -8,12 +8,12 @@ process MASHTREE {
         'quay.io/biocontainers/mashtree:1.2.0--pl526h516909a_0' }"
 
     input:
-    tuple val(meta), path(seqs)
+    path seqs
 
     output:
-    tuple val(meta), path("*.dnd"), emit: tree
-    tuple val(meta), path("*.tsv"), emit: matrix
-    path "versions.yml"           , emit: versions
+    path "mashtree.dnd"       , emit: tree
+    path "mashtree_matrix.tsv", emit: matrix
+    path "versions.yml"       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,8 +25,8 @@ process MASHTREE {
     mashtree \\
         $args \\
         --numcpus $task.cpus \\
-        --outmatrix ${prefix}.tsv \\
-        --outtree ${prefix}.dnd \\
+        --outmatrix mashtree_matrix.tsv \\
+        --outtree mashtree.dnd \\
         $seqs
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
