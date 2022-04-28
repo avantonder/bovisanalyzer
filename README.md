@@ -14,15 +14,15 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 ## Pipeline summary
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Calculate fastq summary statistics ([fastq-scan](https://github.com/rpetit3/fastq-scan))
+2. Calculate fastq summary statistics ([`fastq-scan`](https://github.com/rpetit3/fastq-scan))
 3. Index reference fasta file ([`BWA index`](https://github.com/lh3/bwa))
 4. Trim reads for quality and adapter sequence ([`fastp`](https://github.com/OpenGene/fastp))
-5. Assign taxonomic labels to sequence reads ([Kraken 2](https://ccb.jhu.edu/software/kraken2/))
-6. Re-estimate taxonomic abundance of samples analyzed by kraken ([Bracken](https://ccb.jhu.edu/software/bracken/))
+5. Assign taxonomic labels to sequence reads ([`Kraken 2`](https://ccb.jhu.edu/software/kraken2/))
+6. Re-estimate taxonomic abundance of samples analyzed by kraken ([`Bracken`](https://ccb.jhu.edu/software/bracken/))
 7. Estimate genome size ([`mash sketch`](https://mash.readthedocs.io/en/latest/index.html))
 8. Downsample fastq files ([`Rasusa`](https://github.com/mbhall88/rasusa))
-9. Detect drug resistance and lineage ([TB-Profiler](https://github.com/jodyphelan/TBProfiler))
-10. Detect spoligotype ([vsnp_spoligotype.py](https://github.com/USDA-VS/vSNP))
+9. Detect drug resistance and lineage ([`TB-Profiler`](https://github.com/jodyphelan/TBProfiler))
+10. Detect spoligotype ([`vsnp_spoligotype.py`](https://github.com/USDA-VS/vSNP))
 11. Variant calling
     1. Read mapping ([`BWA mem`](https://github.com/lh3/bwa))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
