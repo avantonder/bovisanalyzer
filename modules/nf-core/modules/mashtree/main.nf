@@ -1,5 +1,4 @@
 process MASHTREE {
-    tag "$meta.id"
     label 'process_medium'
 
     conda (params.enable_conda ? "bioconda::mashtree=1.2.0" : null)
