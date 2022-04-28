@@ -32,7 +32,6 @@ workflow SUB_SAMPLING {
     ch_versions = ch_versions.mix(RASUSA.out.versions.first())
 
     emit:
-    reads    = RASUSA.out.reads      // channel: [ reads ]
-    mash     = MASH_SKETCH.out.mash
+    reads   = RASUSA.out.reads      // channel: [ reads ]
     versions = ch_versions.ifEmpty(null) // channel: [ versions.yml ]
 }
