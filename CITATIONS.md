@@ -10,10 +10,46 @@
 
 ## Pipeline tools
 
+- [bcftools](https://www.ncbi.nlm.nih.gov/pubmed/21903627/)
+  > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics. 2011 Nov 1;27(21):2987-93. doi: 10.1093/bioinformatics/btr509. Epub 2011 Sep 8. PubMed PMID: 21903627; PubMed Central PMCID: PMC3198575.
+
+- [Bracken](https://peerj.com/articles/cs-104/)
+  > Lu J, Breitwieser FP, Thielen P, Salzberg SL. Bracken: estimating species abundance in metagenomics data. PeerJ Computer Science. 2017: 3:e104. doi: 10.7717/peerj-cs.104.
+
+- [BWA](https://pubmed.ncbi.nlm.nih.gov/19451168/)
+  > Li H, Durbin R. Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics. 2009 Jul 15;25(14):1754-60. doi: 10.1093/bioinformatics/btp324. Epub 2009 May 18. PMID: 19451168; PMCID: PMC2705234.
+
+- [fastp](https://www.ncbi.nlm.nih.gov/pubmed/30423086/)
+  > Chen S, Zhou Y, Chen Y, Gu J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics. 2018 Sep 1;34(17):i884-i890. doi: 10.1093/bioinformatics/bty560. PubMed PMID: 30423086; PubMed Central PMCID: PMC6129281.
+
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+
+- [fastq-scan](https://github.com/rpetit3/fastq-scan)
+
+- [Kraken 2](https://www.ncbi.nlm.nih.gov/pubmed/31779668/)
+    > Wood DE, Lu J, Langmead B. Improved metagenomic analysis with Kraken 2. Genome Biol. 2019 Nov 28;20(1):257. doi: 10.1186/s13059-019-1891-0. PubMed PMID: 31779668; PubMed Central PMCID: PMC6883579.
+
+- [Mash](https://pubmed.ncbi.nlm.nih.gov/27323842/)
+  > Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Mash: fast genome and metagenome distance estimation using MinHash. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x. PMID: 27323842; PMCID: PMC4915045.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+
+- [Rasusa](https://github.com/mbhall88/rasusa)
+  > Hall MB. Rasusa: Randomly subsample sequencing reads to a specified coverage. 2019. doi:10.5281/zenodo.3731394
+
+- [remove_blocks_from_aln](https://github.com/sanger-pathogens/remove_blocks_from_aln)
+
+- [samtools](https://www.ncbi.nlm.nih.gov/pubmed/19505943/)
+  > Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R; 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-9. doi: 10.1093/bioinformatics/btp352. Epub 2009 Jun 8. PubMed PMID: 19505943; PubMed Central PMCID: PMC2723002.
+
+- [SNP-sites](https://pubmed.ncbi.nlm.nih.gov/28348851/)
+  > Page AJ, Taylor B, Delaney AJ, Soares J, Seemann T, Keane JA, Harris SR. SNP-sites: rapid efficient extraction of SNPs from multi-FASTA alignments. Microb Genom. 2016 Apr 29;2(4):e000056. doi: 10.1099/mgen.0.000056. PMID: 28348851; PMCID: PMC5320690.
+
+- [TB-profiler](https://pubmed.ncbi.nlm.nih.gov/31234910/)
+  > Phelan JE, O'Sullivan DM, Machado D, Ramos J, Oppong YEA, Campino S, O'Grady J, McNerney R, Hibberd ML, Viveiros M, Huggett JF, Clark TG. Integrating informatics tools and portable sequencing technology for rapid detection of resistance to anti-tuberculous drugs. Genome Med. 2019 Jun 24;11(1):41. doi: 10.1186/s13073-019-0650-x. PMID: 31234910; PMCID: PMC6591855.
+
+- [vsnp_spoligotype.py](https://github.com/USDA-VS/vSNP)
 
 ## Software packaging/containerisation tools
 
