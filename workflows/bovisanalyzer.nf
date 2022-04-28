@@ -75,6 +75,7 @@ include { FASTQSCAN                                               } from '../mod
 include { KRAKEN2_KRAKEN2                                         } from '../modules/nf-core/modules/kraken2/kraken2/main'
 include { BRACKEN_BRACKEN                                         } from '../modules/nf-core/modules/bracken/bracken/main'
 include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
+include { MASHTREE                                                } from '../modules/nf-core/modules/mashtree/main'
 include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
 include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
 include { SNPSITES                                                } from '../modules/nf-core/modules/snpsites/main'
@@ -209,8 +210,17 @@ workflow BOVISANALYZER {
             ch_variants_fastq
         )
     ch_variants_fastq = SUB_SAMPLING.out.reads
+    ch_sketch_mashtree = SUB_SAMPLING.out.mash
     ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
 
+    //
+    // MODULE: Mashtree
+    //
+    MASHTREE(
+            ch_sketch_mashtree.collect{it[1]}.ifEmpty([])
+        )
+    ch_versions = ch_versions.mix(MASHTREE.out.versions.first())
+    
     //
     // MODULE: TBprofiler
     //
