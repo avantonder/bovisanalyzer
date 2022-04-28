@@ -19,7 +19,6 @@ process MASHTREE {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     mashtree \\
         $args \\
