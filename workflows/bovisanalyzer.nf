@@ -26,9 +26,16 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",    checkIfExists: true)
-ch_tab                   = file("$projectDir/assets/AF2122_region_exclude", checkIfExists: true)
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",    checkIfExists: true)
+ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",    checkIfExists: true)
+ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdbnew.bed",            checkIfExists: true)
+ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdbnew.dr.json",        checkIfExists: true)
+ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",          checkIfExists: true)
+ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
+ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
+ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",       checkIfExists: true)
+ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
@@ -43,6 +50,8 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
+include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
+include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
@@ -190,6 +199,7 @@ workflow BOVISANALYZER {
             ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
             ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
         )
+    ch_kraken_metadata = KRAKENPARSE.out.composition
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
     //
@@ -204,38 +214,56 @@ workflow BOVISANALYZER {
     //
     // MODULE: TBprofiler
     //
-    ch_tbprofiler = Channel.empty()
+    //ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
+            ch_tbdb_barcode,
+            ch_tbdb_bed,
+            ch_tbdb_drjson,
+            ch_tbdb_fasta,
+            ch_tbdb_gff,
+            ch_tbdb_varjson,
+            ch_tbdb_verjson,
             ch_variants_fastq
         )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
     ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
     
-    //ch_variants_fastq
-    //    .join(TBPROFILER_PROFILE.out.csv)
-    //    .join(TBPROFILER_PROFILE.out.json)
-    //    .join(TBPROFILER_PROFILE.out.txt)
-    //    .map { meta, reads, csv, json, txt -> [ meta, csv, json, txt ] }
-    //    .set { ch_tbprofiler }
-
-    //ch_variants_fastq
-    //    .map { meta, reads, csv, json, txt -> [ meta, reads ] }
-    //    .set { ch_variants_fastq }
-
     //
     // MODULE: Collate TB-profiler outputs
     //
     TBPROFILER_COLLATE(
             ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
         )
-    
+    ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
+
     //
     // MODULE: vsnp_spoligotype.py
     //
     SPOLIGOTYPE(
             ch_variants_fastq
         )
+    ch_spoligo_spoligoparse = SPOLIGOTYPE.out.txt
     ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
+
+    //
+    // MODULE: Run spoligoparse
+    //
+    SPOLIGOPARSE (
+            ch_spoligo_spoligoparse.collect{it[1]}.ifEmpty([])
+        )
+    ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
+    ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
+    
+    //
+    // MODULE: Run metadata_collate
+    //
+    METADATA_COLLATE (
+            ch_kraken_metadata,
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata
+
+        )
+    ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
     
     //
     // MODULE: Map reads

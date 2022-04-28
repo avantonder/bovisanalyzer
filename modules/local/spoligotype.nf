@@ -30,6 +30,8 @@ process SPOLIGOTYPE {
         
     head -n1 spoligo.txt > ${prefix}.txt
 
+    rm spoligo.txt
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         vsnp_spoligotype.py: ${spoligotype_version}

@@ -8,6 +8,13 @@ process TBPROFILER_PROFILE {
         'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
 
     input:
+    path tbdb_barcode
+    path tbdb_bed
+    path tbdb_drjson
+    path tbdb_fasta
+    path tbdb_gff
+    path tbdb_varjson
+    path tbdb_verjson
     tuple val(meta), path(reads)
 
     output:
@@ -34,6 +41,7 @@ process TBPROFILER_PROFILE {
         --no_trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
+        --external_db ./tbdbnew \\
         $input_reads
 
     cat <<-END_VERSIONS > versions.yml
