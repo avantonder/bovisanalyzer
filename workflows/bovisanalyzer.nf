@@ -49,9 +49,8 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
-include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
-include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
 include { SPOTYPING                   } from '../modules/local/spotyping'
+include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
 include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
@@ -238,31 +237,23 @@ workflow BOVISANALYZER {
     ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
 
     //
-    // MODULE: vsnp_spoligotype.py
+    // MODULE: Run SpoTyping
     //
-    SPOLIGOTYPE(
+    SPOTYPING (
             ch_variants_fastq
         )
-    ch_spoligo_spoligoparse = SPOLIGOTYPE.out.txt
-    ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
+    ch_spotyping_spoligoparse = SPOTYPING.out.txt
+    ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
 
     //
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
-            ch_spoligo_spoligoparse.collect{it[1]}.ifEmpty([])
+            ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
         )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
-    
-    //
-    // MODULE: Run spoligoparse
-    //
-    SPOTYPING (
-            ch_variants_fastq
-        )
-    ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
-    
+      
     //
     // MODULE: Run metadata_collate
     //
