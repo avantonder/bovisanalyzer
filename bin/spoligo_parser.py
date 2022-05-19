@@ -6,7 +6,7 @@ import numpy as np
 
 # Read in spoligotype database file
 
-spoligo_db = "/../assets/spoligotype_db.txt"
+spoligo_db = "../assets/spoligotype_db.txt"
 
 spoligo_db_read = pd.read_csv(spoligo_db, sep=' ', header=None)
 
