@@ -1,4 +1,5 @@
 process SPOTYPING {
+    tag "$meta.id"
     label 'process_medium'
 
     conda (params.enable_conda ? "bioconda::spotyping=2.1-3" : null)
