@@ -3,10 +3,10 @@ process TBPROFILER_PROFILE {
     label 'process_high'
     label 'error_retry'
 
-    conda (params.enable_conda ? "bioconda::tb-profiler=4.1.1" : null)
+    conda (params.enable_conda ? "bioconda::tb-profiler=4.2.0" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/tb-profiler:4.1.1--pypyh5e36f6f_1' :
-        'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
+        'https://depot.galaxyproject.org/singularity/tb-profiler:4.2.0--pypyh5e36f6f_0' :
+        'quay.io/biocontainers/tb-profiler:tb-profiler:4.2.0--pypyh5e36f6f_0' }"
 
     input:
     path tbdb_barcode
