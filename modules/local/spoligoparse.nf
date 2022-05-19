@@ -19,6 +19,7 @@ process SPOLIGOPARSE {
     
     input:
     path txt
+    path db
 
     output:
     path "Spoligotype_summary.tsv", emit: tsv
