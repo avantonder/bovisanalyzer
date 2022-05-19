@@ -51,6 +51,7 @@ include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
 include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
+include { SPOTYPING                   } from '../modules/local/spotyping'
 include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
@@ -253,6 +254,14 @@ workflow BOVISANALYZER {
         )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
+    
+    //
+    // MODULE: Run spoligoparse
+    //
+    SPOTYPING (
+            ch_variants_fastq
+        )
+    ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
     
     //
     // MODULE: Run metadata_collate
