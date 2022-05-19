@@ -33,7 +33,7 @@ ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",        
 ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
 ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
 ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",       checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",       checkIfExists: true)
 ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
@@ -249,6 +249,7 @@ workflow BOVISANALYZER {
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
+            ch_spoligotype_db,
             ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
         )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
