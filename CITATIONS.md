@@ -29,9 +29,6 @@
 - [Kraken 2](https://www.ncbi.nlm.nih.gov/pubmed/31779668/)
     > Wood DE, Lu J, Langmead B. Improved metagenomic analysis with Kraken 2. Genome Biol. 2019 Nov 28;20(1):257. doi: 10.1186/s13059-019-1891-0. PubMed PMID: 31779668; PubMed Central PMCID: PMC6883579.
 
-- [Mash](https://pubmed.ncbi.nlm.nih.gov/27323842/)
-  > Ondov BD, Treangen TJ, Melsted P, Mallonee AB, Bergman NH, Koren S, Phillippy AM. Mash: fast genome and metagenome distance estimation using MinHash. Genome Biol. 2016 Jun 20;17(1):132. doi: 10.1186/s13059-016-0997-x. PMID: 27323842; PMCID: PMC4915045.
-
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
@@ -46,10 +43,11 @@
 - [SNP-sites](https://pubmed.ncbi.nlm.nih.gov/28348851/)
   > Page AJ, Taylor B, Delaney AJ, Soares J, Seemann T, Keane JA, Harris SR. SNP-sites: rapid efficient extraction of SNPs from multi-FASTA alignments. Microb Genom. 2016 Apr 29;2(4):e000056. doi: 10.1099/mgen.0.000056. PMID: 28348851; PMCID: PMC5320690.
 
+- [SpoTyping](https://pubmed.ncbi.nlm.nih.gov/26883915/)
+  > Xia E, Teo YY, Ong RT. SpoTyping: fast and accurate in silico Mycobacterium spoligotyping from sequence reads. Genome Med. 2016 Feb 17;8(1):19. doi: 10.1186/s13073-016-0270-7. PMID: 26883915; PMCID: PMC4756441.
+
 - [TB-profiler](https://pubmed.ncbi.nlm.nih.gov/31234910/)
   > Phelan JE, O'Sullivan DM, Machado D, Ramos J, Oppong YEA, Campino S, O'Grady J, McNerney R, Hibberd ML, Viveiros M, Huggett JF, Clark TG. Integrating informatics tools and portable sequencing technology for rapid detection of resistance to anti-tuberculous drugs. Genome Med. 2019 Jun 24;11(1):41. doi: 10.1186/s13073-019-0650-x. PMID: 31234910; PMCID: PMC6591855.
-
-- [vsnp_spoligotype.py](https://github.com/USDA-VS/vSNP)
 
 ## Software packaging/containerisation tools
 
