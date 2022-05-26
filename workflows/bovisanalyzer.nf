@@ -47,6 +47,7 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { FASTQSCANPARSE              } from '../modules/local/fastqscanparse'
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOTYPING                   } from '../modules/local/spotyping'
@@ -117,7 +118,16 @@ workflow BOVISANALYZER {
     FASTQSCAN (
         INPUT_CHECK.out.reads
     )
+    ch_fastqscan_fastqscanparse = FASTQSCAN.out.json
     ch_versions = ch_versions.mix(FASTQSCAN.out.versions.first())
+
+    //
+    // MODULE: Run fastqscanparse
+    //
+    FASTQSCANPARSE (
+            ch_fastqscan_fastqscanparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
