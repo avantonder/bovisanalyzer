@@ -33,7 +33,7 @@ ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",        
 ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
 ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
 ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.txt",       checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",       checkIfExists: true)
 ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
@@ -47,9 +47,10 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { FASTQSCANPARSE              } from '../modules/local/fastqscanparse'
 include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
-include { SPOLIGOTYPE                 } from '../modules/local/spoligotype'
+include { SPOTYPING                   } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
 include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
@@ -117,7 +118,16 @@ workflow BOVISANALYZER {
     FASTQSCAN (
         INPUT_CHECK.out.reads
     )
+    ch_fastqscan_fastqscanparse = FASTQSCAN.out.json
     ch_versions = ch_versions.mix(FASTQSCAN.out.versions.first())
+
+    //
+    // MODULE: Run fastqscanparse
+    //
+    FASTQSCANPARSE (
+            ch_fastqscan_fastqscanparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
@@ -237,23 +247,24 @@ workflow BOVISANALYZER {
     ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
 
     //
-    // MODULE: vsnp_spoligotype.py
+    // MODULE: Run SpoTyping
     //
-    SPOLIGOTYPE(
+    SPOTYPING (
             ch_variants_fastq
         )
-    ch_spoligo_spoligoparse = SPOLIGOTYPE.out.txt
-    ch_versions = ch_versions.mix(SPOLIGOTYPE.out.versions.first())
+    ch_spotyping_spoligoparse = SPOTYPING.out.txt
+    ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
 
     //
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
-            ch_spoligo_spoligoparse.collect{it[1]}.ifEmpty([])
+            ch_spoligotype_db,
+            ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
         )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
-    
+      
     //
     // MODULE: Run metadata_collate
     //

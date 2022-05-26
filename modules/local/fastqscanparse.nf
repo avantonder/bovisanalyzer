@@ -1,10 +1,4 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
-process SPOLIGOPARSE {
+process FASTQSCANPARSE {
     label 'process_low'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -18,20 +12,19 @@ process SPOLIGOPARSE {
     }
     
     input:
-    path txt
-    path db
+    path json
 
     output:
-    path "Spoligotype_summary.tsv", emit: tsv
-    path  "versions.yml"          , emit: versions
+    path "fastq-scan_summary.tsv", emit: tsv
+    path  "versions.yml"         , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
     def parser_version = '1.0'
     """
-    spoligo_parser.py
+    fastqscan_parser.py
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        spoligo_parser.py: ${parser_version}
+        fastqscan_parser.py: ${parser_version}
     END_VERSIONS 
     """
 }

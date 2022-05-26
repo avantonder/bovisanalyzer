@@ -1,40 +1,39 @@
-process SPOLIGOTYPE {
+process SPOTYPING {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "bioconda::vsnp=2.0.3" : null)
+    conda (params.enable_conda ? "bioconda::spotyping=2.1-3" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/vsnp:2.03--hdfd78af_2' :
-        'quay.io/biocontainers/vsnp:2.03--hdfd78af_2' }"
+        'https://depot.galaxyproject.org/singularity/spotyping:2.1--3' :
+        'quay.io/biocontainers/spotyping:2.1--3' }"
 
     input:
+
     tuple val(meta), path(reads)
 
     output:
     tuple val(meta), path("*.txt"), emit: txt
+    tuple val(meta), path("*.log"), emit: log
+    tuple val(meta), path("*.log"), emit: xls
     path "versions.yml"           , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
-    script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
+    script:
     def args = task.ext.args   ?: ''
     prefix   = task.ext.prefix ?: "${meta.id}"
     def input_reads = meta.single_end ? "-r1 $reads" : "-r1 ${reads[0]} -r2 ${reads[1]}"
-    def spoligotype_version = '2.03'
-    script: 
+    def spotyping_version = '2.1'
     """
-    vsnp_spoligotype.py \\
+    SpoTyping.py \\
         $args \\
-        $input_reads
+        $input_reads \\
+        -o ${prefix}.txt
         
-    head -n1 spoligo.txt > ${prefix}.txt
-
-    rm spoligo.txt
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        vsnp_spoligotype.py: ${spoligotype_version}
-    END_VERSIONS
+        SpoTyping.py: ${spotyping_version}
+    END_VERSIONS      
     """
 }
