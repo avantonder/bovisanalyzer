@@ -319,7 +319,7 @@ workflow BOVISANALYZER {
         ch_seqtk_seqtkparse.collect{it[1]}.ifEmpty([])
     )
     ch_seqtk_metadata = SEQTK_PARSE.out.tsv
-    ch_versions = ch_versions.mix(SEQTK_PARSE.out.versions.first())
+    ch_versions       = ch_versions.mix(SEQTK_PARSE.out.versions.first())
 
     //
     // MODULE: Collate all metadata
