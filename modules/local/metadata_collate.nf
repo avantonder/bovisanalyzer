@@ -21,6 +21,7 @@ process METADATA_COLLATE {
     path txt
     path spoligo_tsv
     path bracken_tsv
+    path seqtk_tsv
 
     output:
     path "metadata_summary.tsv", emit: tsv
