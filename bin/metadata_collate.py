@@ -28,6 +28,6 @@ spoligo_merge = pd.merge(bracken_tbprofiler_merge, spoligo_summary_df_filter, on
 
 all_merge = pd.merge(spoligo_merge, seqtk_summary_df_filter, on = ['sample'])
 
-summary_file_name = 'Metadata_summary.tsv'
+summary_file_name = 'metadata_summary.tsv'
 
 all_merge.to_csv(summary_file_name, sep = '\t', header = True, index = False)
