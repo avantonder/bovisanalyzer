@@ -4,11 +4,11 @@ import os, argparse, sys, subprocess
 import pandas as pd
 import numpy as np
 
-spoligo_summary_df = pd.read_csv('Spoligotype_summary.tsv', sep='\t')
+spoligo_summary_df = pd.read_csv('spoligotype_summary.tsv', sep='\t')
 
 tbprofiler_summary_df = pd.read_csv('tbprofiler.txt', sep='\t')
 
-bracken_summary_df = pd.read_csv('Bracken_species_composition.tsv', sep='\t')
+bracken_summary_df = pd.read_csv('species_composition.tsv', sep='\t')
 
 seqtk_summary_df = pd.read_csv('mapping_summary.tsv', sep='\t')
 
