@@ -54,9 +54,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
      wget -L https://raw.githubusercontent.com/avantonder/bovisanalyzer/main/bin/fastq_dir_to_samplesheet.py
      ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv -r1 <FWD_FASTQ_SUFFIX> -r2 <REV_FASTQ_SUFFIX>
 
-   Alternatively the samplesheet.csv file created by nf-core/fetchngs can also be used.
+Alternatively the samplesheet.csv file created by nf-core/fetchngs can also be used.
 
-3. Start running your own analysis!
+5. Start running your own analysis!
 
    - Typical command
 
