@@ -30,12 +30,12 @@ ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",  
 ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdbnew.bed",            checkIfExists: true)
 ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdbnew.dr.json",        checkIfExists: true)
 ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",          checkIfExists: true)
-ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
+ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",            checkIfExists: true)
 ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
 ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",       checkIfExists: true)
-ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
+ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",          checkIfExists: true)
+ch_mask                  = file("$projectDir/assets/DataDrivenMerge20.bed",       checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",          checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
@@ -52,12 +52,11 @@ include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOTYPING                   } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
-include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
+include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome_new'
 include { SEQTK_COMP                  } from '../modules/local/seqtk_comp'
 include { SEQTK_PARSE                 } from '../modules/local/seqtk_parse'
 include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
-include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
 
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
@@ -300,7 +299,8 @@ workflow BOVISANALYZER {
     //
     VCF2PSEUDOGENOME (
         VARIANTS_BCFTOOLS.out.filtered_vcf,
-        ch_reference
+        ch_reference,
+        ch_mask
     )
     
     //
@@ -353,15 +353,6 @@ workflow BOVISANALYZER {
     aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
         .map{ it[1] }
         .set { aligned_pseudogenomes }
-
-    //
-    // MODULE: Mask alignment
-    //
-    REMOVE_BLOCKS (
-        aligned_pseudogenomes,
-        ch_tab
-    )
-    ch_versions = ch_versions.mix(REMOVE_BLOCKS.out.versions.first())
 
     //
     // MODULE: Extract SNPs from masked alignment
