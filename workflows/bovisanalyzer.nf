@@ -358,7 +358,7 @@ workflow BOVISANALYZER {
     // MODULE: Extract SNPs from masked alignment
     //
     SNPSITES (
-        REMOVE_BLOCKS.out.fasta
+        aligned_pseudogenomes
     )
     ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
 
