@@ -53,6 +53,6 @@ final_abundance_sorted = pd.concat([final_abundance['name'], final_abundance.fil
 
 final_abundance_sorted.columns = final_abundance_sorted.columns.str.replace('_freq', '')
 
-final_abundance_tsv_name = 'Bracken_species_composition.tsv'
+final_abundance_tsv_name = 'species_composition.tsv'
 
 final_abundance_sorted.T.to_csv(final_abundance_tsv_name, sep = '\t', header = False)

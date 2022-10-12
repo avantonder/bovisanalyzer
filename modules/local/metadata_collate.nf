@@ -21,9 +21,10 @@ process METADATA_COLLATE {
     path txt
     path spoligo_tsv
     path bracken_tsv
+    path seqtk_tsv
 
     output:
-    path "Metadata_summary.tsv", emit: tsv
+    path "metadata_summary.tsv", emit: tsv
     path  "versions.yml"       , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/

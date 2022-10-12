@@ -23,6 +23,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [`Sort bam files`](#sort-bam-files)
 - [`Call and filter variants`](#call-and-filter-variants)
 - [`Convert filtered vcf to pseudogenome`](#convert-filtered-vcf-to-pseudogenome)
+- [`Calculate percentage of reference mapped`](#calculate-percentage-of-reference-mapped)
 - [`Create alignment from pseudogenomes`](#create-alignment-from-pseudogenomes)
 - [`Mask alignment`](#mask-alignment)
 - [`Remove non-informative positions`](#remove-non-informative-positions)
@@ -143,13 +144,6 @@ In order to map the reads to the reference sequence it is indexed.
     * `*.csv` CSV formated result file of resistance and strain type
     * `*.txt` JSON formated result file of resistance and strain type
     * `*.json` Text file of resistance and strain type
-* `tbprofiler/`
-    * `tbprofiler.variants.txt` Text file of variants for all samples
-    * `tbprofiler.txt` Text file of lineage and variants for all samples
-    * `tbprofiler.lineage.itol.txt` Text file in iTOL format of lineage for all samples
-    * `tbprofiler.json` Json file of lineage and variants for all samples
-    * `tbprofiler.dr.itol.txt` Text file in iTOL format of drug resistance profile for all samples
-    * `tbprofiler.dr.indiv.itol.txt` Text file in iTOL format of individual drug resistance profiles for all samples
 
 </details>
 
@@ -160,13 +154,12 @@ In order to map the reads to the reference sequence it is indexed.
 <details markdown="1">
 <summary>Output files</summary>
 
-* `spoligotype/`
-    * `*.txt` Text file containing binary, octal and SB number
-    * `Spoligotype_summary.tsv` Summary of spoligotypes for all samples
-
+* `spotyping/`
+    * `*.txt` Text file containing binary and octal
+    
 </details>
 
-[vsnp_spoligotype.py](https://github.com/USDA-VS/vSNP) is a tool from the vSNP pipeline for extracting the spoligotype binary from the sequence reads and looking them up in the spoligotype_db.txt file in the assets directory.
+[SpoTyping](https://github.com/xiaeryu/SpoTyping-v2.0) is a tool for extracting the spoligotype binary and binary from sequence reads.
 
 ### Read Mapping
 
@@ -216,6 +209,18 @@ The filtered vcf files are converted to a pseudogenome.
 
 </details>
 
+### Calculate percentage of reference mapped
+
+The `seqtk` tool is used to identify the number of mapped bases within the pseudogenome fasta files.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `seqtk/`
+    * `*.tsv` tsv with base count and distribution for each pseudogenome
+
+</details>
+
 ### Create Alignment from Pseudogenomes
 
 Only those pseudogenome fasta files that have a non-ACGT fraction less than the threshold specified will be included in the `aligned_pseudogenomes.fas` file. Those failing this will be reported in the `low_quality_pseudogenomes.tsv` file.
@@ -251,6 +256,28 @@ Before building trees, non-informative constant sites are removed from the align
 * `snpsites/`
     * `constant.sites.txt` A file with the number of constant sites for each base
     * `filtered_alignment.fas` Alignment with only informative positions (those positions that have at least one alternative variant base)
+
+</details>
+
+### Summarise sample metadata
+
+Summary files from `fastqscan`, `bracken`, `spotyping`, `tbprofiler` and `seqtk` are collected and a final metadata summary created
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `metadata/`
+    * `fastq-scan_summary.tsv` Summary of fastq metrics for all samples
+    * `mapping_summary.tsv` Summary of seqtk output for all samples
+    * `metadata_summary.tsv` Summary of important metadata for all samples
+    * `species_composition.tsv` Taxonomic composition of reads for all samples
+    * `spoligotype_summary.tsv` Summary of spoligotypes for all samples
+    * `tbprofiler.variants.txt` Text file of variants for all samples
+    * `tbprofiler.txt` Text file of lineage and variants for all samples
+    * `tbprofiler.lineage.itol.txt` Text file in iTOL format of lineage for all samples
+    * `tbprofiler.json` Json file of lineage and variants for all samples
+    * `tbprofiler.dr.itol.txt` Text file in iTOL format of drug resistance profile for all samples
+    * `tbprofiler.dr.indiv.itol.txt` Text file in iTOL format of individual drug resistance profiles for all samples
 
 </details>
 

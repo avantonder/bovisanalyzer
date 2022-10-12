@@ -22,7 +22,7 @@ process SPOLIGOPARSE {
     path db
 
     output:
-    path "Spoligotype_summary.tsv", emit: tsv
+    path "spoligotype_summary.tsv", emit: tsv
     path  "versions.yml"          , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/

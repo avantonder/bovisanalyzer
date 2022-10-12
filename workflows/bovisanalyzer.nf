@@ -52,8 +52,10 @@ include { KRAKENPARSE                 } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
 include { SPOTYPING                   } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
-include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
+include { SEQTK_COMP                  } from '../modules/local/seqtk_comp'
+include { SEQTK_PARSE                 } from '../modules/local/seqtk_parse'
+include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
 include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
 include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
 
@@ -264,18 +266,7 @@ workflow BOVISANALYZER {
         )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
-      
-    //
-    // MODULE: Run metadata_collate
-    //
-    METADATA_COLLATE (
-            ch_kraken_metadata,
-            ch_tbprofiler_metadata,
-            ch_spoligo_metadata
-
-        )
-    ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
-    
+        
     //
     // MODULE: Map reads
     //
@@ -311,9 +302,38 @@ workflow BOVISANALYZER {
         VARIANTS_BCFTOOLS.out.filtered_vcf,
         ch_reference
     )
+    
+    //
+    // MODULE: Calculate number of mapped positions in pseudogenome
+    //
+    SEQTK_COMP (
+        VCF2PSEUDOGENOME.out.pseudogenome
+    )
+    ch_seqtk_seqtkparse = SEQTK_COMP.out.tsv
+    ch_versions = ch_versions.mix(SEQTK_COMP.out.versions.first())
 
     //
-    // MODULE: make pseudogenome alignment
+    // MODULE: Calculate number of mapped positions in pseudogenome
+    //
+    SEQTK_PARSE (
+        ch_seqtk_seqtkparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_seqtk_metadata = SEQTK_PARSE.out.tsv
+    ch_versions       = ch_versions.mix(SEQTK_PARSE.out.versions.first())
+
+    //
+    // MODULE: Collate all metadata
+    //
+    METADATA_COLLATE (
+            ch_kraken_metadata,
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata,
+            ch_seqtk_metadata
+        )
+    ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+    
+    //
+    // MODULE: Make pseudogenome alignment
     //
     ALIGNPSEUDOGENOMES (
         VCF2PSEUDOGENOME.out.pseudogenome.map { pseudogenome -> pseudogenome[1] }.collect(),

@@ -22,7 +22,7 @@ process KRAKENPARSE {
     path report
 
     output:
-    path "Bracken_species_composition.tsv", emit: composition
+    path "species_composition.tsv", emit: composition
     path  "versions.yml"                  , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/

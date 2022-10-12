@@ -27,10 +27,12 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Call and filter variants ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
     4. Convert filtered bcf to pseudogenome fasta ([`vcf2pseudogenome.py`](https://github.com/nf-core/bactmap/blob/dev/bin/vcf2pseudogenome.py))
+    5. Calculate the percentage of the reference mapped in each pseudogenome fasta ([`seqtk`](https://github.com/lh3/seqtk))
 11. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
 12. Mask alignment using coordinates from [Price *et al* 2018](https://pubmed.ncbi.nlm.nih.gov/30425997/) ([`remove_blocks_from_aln`](https://github.com/sanger-pathogens/remove_blocks_from_aln))
 13. Extract variant sites from alignment ([`SNP-sites`](https://github.com/sanger-pathogens/snp-sites))
-14. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
+14. Summarise fastq metrics, species composition and genotyping
+15. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
 
@@ -46,22 +48,27 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
    tar xvfz minikraken2_v1_8GB_201904.tgz
    ```
 
-4. Create a samplesheet.csv file to use as input for the pipeline. In the directory where your sample fastq files are located, run the following command:
+4. An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/avantonder/bovisanalyzer/blob/main/bin/fastq_dir_to_samplesheet.py) has been provided and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
-   ```console
-   for i in *_1.fastq.gz;do echo ${i%_1.fastq.gz},$(readlink -f $i),$(readlink -f ${i%_1.fastq.gz}_2.fastq.gz) >> samplesheet.csv;done
-   ```
-   Open `samplesheet.csv` in your favourite terminal text editor (`vim`, `nano`) and add the following line to the top of the file:
+     ```console
+     wget -L https://raw.githubusercontent.com/avantonder/bovisanalyzer/main/bin/fastq_dir_to_samplesheet.py
+     ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv -r1 <FWD_FASTQ_SUFFIX> -r2 <REV_FASTQ_SUFFIX>
 
-   ```console
-   sample,fastq_1,fastq_2
-   ```
+Alternatively the samplesheet.csv file created by nf-core/fetchngs can also be used.
 
-3. Start running your own analysis!
+5. Start running your own analysis!
 
-   ```console
-   nextflow run avantonder/bovisanalyzer --input samplesheet.csv --reference Mycobacterium_bovis_AF2122_97_GCF_000195835_2.fa -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --kraken2db minikraken2_v1_8GB --brackendb minikraken2_v1_8GB
-   ```
+   - Typical command
+
+   ```bash
+    nextflow run avantonder/bovisanalyzer \
+        -profile <docker/singularity/podman/conda/institute> \
+        --input samplesheet.csv \
+        --reference <REFERENCE FASTA>
+        --kraken2db minikraken2_v1_8GB \
+        --brackendb minikraken2_v1_8GB \
+        --outdir <OUTDIR>
+    ```
 
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
 

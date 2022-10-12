@@ -56,6 +56,6 @@ spoligo_ordered_df = spoligo_lookup_df[cols]
 
 # Save to tsv file
 
-spoligo_tsv_name = 'Spoligotype_summary.tsv'
+spoligo_tsv_name = 'spoligotype_summary.tsv'
 
 spoligo_ordered_df.to_csv(spoligo_tsv_name, sep = '\t', header = True, index = False)
