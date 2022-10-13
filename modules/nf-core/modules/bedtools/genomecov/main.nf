@@ -24,7 +24,7 @@ process BEDTOOLS_GENOMECOV {
     bedtools \\
         genomecov \\
         $args \\
-        -ibam $intervals | \\
+        -ibam $bam | \\
         grep -w "0\$" | cut -f -3 \\
         > ${prefix}_zerocov.bed
     cat <<-END_VERSIONS > versions.yml
