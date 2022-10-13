@@ -30,7 +30,7 @@ workflow CREATE_MASK {
      * MODULE Extract low quality regions
      */
     BEDTOOLS_MERGE ( 
-        BCFTOOLS_FILTER.out.filtered_vcf, 
+        BCFTOOLS_FILTER.out.vcf, 
         BEDTOOLS_GENOMECOV.out.zerocov_bed, 
         mask
     )
