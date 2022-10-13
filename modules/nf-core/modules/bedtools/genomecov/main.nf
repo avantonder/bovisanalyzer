@@ -11,7 +11,7 @@ process BEDTOOLS_GENOMECOV {
     tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("*.bed"), emit: zerocov_bed
+    tuple val(meta), path("*.bed"), emit: bed
     path  "versions.yml"          , emit: versions
 
     when:
