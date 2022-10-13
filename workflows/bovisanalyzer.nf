@@ -63,6 +63,7 @@ include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp
 include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools'
 include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools'
 include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'
+include { CREATE_MASK                 } from '../subworkflows/local/create_mask'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -295,12 +296,23 @@ workflow BOVISANALYZER {
     ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
     //
+    // SUBWORKFLOW: Create mask bed file
+    //
+
+    CREATE_MASK (
+        BAM_SORT_SAMTOOLS.out.bam,
+        VARIANTS_BCFTOOLS.out.vcf,
+        ch_mask
+    )
+    ch_versions = ch_versions.mix(CREATE_MASK.out.versions.first())
+
+    //
     // MODULE: Make pseudogenome from VCF
     //
     VCF2PSEUDOGENOME (
         VARIANTS_BCFTOOLS.out.filtered_vcf,
         ch_reference,
-        ch_mask
+        CREATE_MASK.out.mask_bed
     )
     
     //
