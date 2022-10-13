@@ -31,7 +31,7 @@ workflow CREATE_MASK {
      */
     BEDTOOLS_MERGE ( 
         BCFTOOLS_FILTER.out.vcf, 
-        BEDTOOLS_GENOMECOV.out.zerocov_bed, 
+        BEDTOOLS_GENOMECOV.out.bed, 
         mask
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
