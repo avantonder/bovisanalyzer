@@ -10,7 +10,7 @@ process VCF2PSEUDOGENOME {
     input:
     tuple val(meta), path(vcf)
     path reference
-    path mask
+    tuple val(meta), path(mask)
 
     output:
     tuple val(meta), path("*.fas"), emit: pseudogenome

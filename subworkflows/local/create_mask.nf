@@ -39,7 +39,7 @@ workflow CREATE_MASK {
     emit:
     filtered_vcf = BCFTOOLS_FILTER.out.vcf         // channel: [ val(meta), [ vcf ] ]
     zerocov_bed  = BEDTOOLS_GENOMECOV.out.bed      // channel: [ val(meta), [ bed ] ]
-    quality_bed  = BEDTOOLS_MERGE.out.bed          // channel: [ val(meta), [ bed ] ]
+    quality_bed  = BEDTOOLS_MERGE.out.qual_bed     // channel: [ val(meta), [ bed ] ]
     mask_bed     = BEDTOOLS_MERGE.out.bed          // channel: [ val(meta), [ tbi ] ]
     
     versions     = ch_versions                     // channel: [ versions.yml ]

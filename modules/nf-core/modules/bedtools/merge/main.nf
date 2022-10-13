@@ -13,8 +13,9 @@ process BEDTOOLS_MERGE {
     path mask
 
     output:
-    tuple val(meta), path('*_mask.bed'), emit: bed
-    path  "versions.yml"          , emit: versions
+    tuple val(meta), path('*_quality.bed'), emit: qual_bed
+    tuple val(meta), path('*_mask.bed'),    emit: bed
+    path  "versions.yml",                   emit: versions
 
     when:
     task.ext.when == null || task.ext.when
