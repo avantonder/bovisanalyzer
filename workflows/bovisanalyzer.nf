@@ -47,23 +47,24 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { FASTQSCANPARSE              } from '../modules/local/fastqscanparse'
-include { KRAKENPARSE                 } from '../modules/local/krakenparse'
-include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
-include { SPOTYPING                   } from '../modules/local/spotyping'
-include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
-include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome_new'
-include { SEQTK_COMP                  } from '../modules/local/seqtk_comp'
-include { SEQTK_PARSE                 } from '../modules/local/seqtk_parse'
-include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
-include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
+include { FASTQSCANPARSE as FASTQSCANPARSE_RAW  } from '../modules/local/fastqscanparse'
+include { FASTQSCANPARSE as FASTQSCANPARSE_TRIM } from '../modules/local/fastqscanparse'
+include { KRAKENPARSE                           } from '../modules/local/krakenparse'
+include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofiler_collate'
+include { SPOTYPING                             } from '../modules/local/spotyping'
+include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
+include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome_new'
+include { SEQTK_COMP                            } from '../modules/local/seqtk_comp'
+include { SEQTK_PARSE                           } from '../modules/local/seqtk_parse'
+include { METADATA_COLLATE                      } from '../modules/local/metadata_collate'
+include { ALIGNPSEUDOGENOMES                    } from '../modules/local/alignpseudogenomes'
 
-include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
-include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools'
-include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools'
-include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'
-include { CREATE_MASK                 } from '../subworkflows/local/create_mask'
+include { INPUT_CHECK                           } from '../subworkflows/local/input_check'
+include { FASTQC_FASTP                          } from '../subworkflows/local/fastqc_fastp'
+include { BAM_SORT_SAMTOOLS                     } from '../subworkflows/local/bam_sort_samtools'
+include { VARIANTS_BCFTOOLS                     } from '../subworkflows/local/variants_bcftools'
+include { SUB_SAMPLING                          } from '../subworkflows/local/sub_sampling'
+include { CREATE_MASK                           } from '../subworkflows/local/create_mask'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,16 +75,17 @@ include { CREATE_MASK                 } from '../subworkflows/local/create_mask'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQSCAN                                               } from '../modules/nf-core/modules/fastqscan/main'
-include { KRAKEN2_KRAKEN2                                         } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { BRACKEN_BRACKEN                                         } from '../modules/nf-core/modules/bracken/bracken/main'
-include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
-include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
-include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
-include { SNPSITES                                                } from '../modules/nf-core/modules/snpsites/main'
-include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
+include { FASTQSCAN as FASTQSCAN_RAW                      } from '../modules/nf-core/modules/fastqscan/main'
+include { FASTQSCAN as FASTQSCAN_TRIM                     } from '../modules/nf-core/modules/fastqscan/main'
+include { KRAKEN2_KRAKEN2                                 } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { BRACKEN_BRACKEN                                 } from '../modules/nf-core/modules/bracken/bracken/main'
+include { BWA_INDEX                                       } from '../modules/nf-core/modules/bwa/index/main'
+include { TBPROFILER_PROFILE                              } from '../modules/nf-core/modules/tbprofiler/profile/main'
+include { BWA_MEM                                         } from '../modules/nf-core/modules/bwa/mem/main'
+include { SNPSITES                                        } from '../modules/nf-core/modules/snpsites/main'
+include { MULTIQC                                         } from '../modules/nf-core/modules/multiqc/main'
+include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS } from '../modules/local/multiqc_tsv_from_list'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                     } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,17 +119,17 @@ workflow BOVISANALYZER {
     //
     // MODULE: Run fastq-scan
     //
-    FASTQSCAN (
+    FASTQSCAN_RAW (
         INPUT_CHECK.out.reads
     )
-    ch_fastqscan_fastqscanparse = FASTQSCAN.out.json
-    ch_versions = ch_versions.mix(FASTQSCAN.out.versions.first())
+    ch_fastqscanraw_fastqscanparse = FASTQSCAN_RAW.out.json
+    ch_versions = ch_versions.mix(FASTQSCAN_RAW.out.versions.first())
 
     //
     // MODULE: Run fastqscanparse
     //
-    FASTQSCANPARSE (
-            ch_fastqscan_fastqscanparse.collect{it[1]}.ifEmpty([])
+    FASTQSCANPARSE_RAW (
+            ch_fastqscanraw_fastqscanparse.collect{it[1]}.ifEmpty([])
     )
     ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
 
@@ -179,6 +181,23 @@ workflow BOVISANALYZER {
         .set { ch_fail_reads_multiqc }
     }
 
+    //
+    // MODULE: Run fastq-scan
+    //
+    FASTQSCAN_TRIM (
+        ch_variants_fastq
+    )
+    ch_fastqscantrim_fastqscanparse = FASTQSCAN_TRIM.out.json
+    ch_versions = ch_versions.mix(FASTQSCAN_TRIM.out.versions.first())
+
+    //
+    // MODULE: Run fastqscanparse
+    //
+    FASTQSCANPARSE_TRIM (
+            ch_fastqscantrim_fastqscanparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
+    
     //
     // MODULE: Run kraken2
     //  
