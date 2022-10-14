@@ -131,7 +131,7 @@ workflow BOVISANALYZER {
     FASTQSCANPARSE_RAW (
             ch_fastqscanraw_fastqscanparse.collect{it[1]}.ifEmpty([])
     )
-    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
+    ch_versions = ch_versions.mix(FASTQSCANPARSE_RAW.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
@@ -196,7 +196,7 @@ workflow BOVISANALYZER {
     FASTQSCANPARSE_TRIM (
             ch_fastqscantrim_fastqscanparse.collect{it[1]}.ifEmpty([])
     )
-    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
+    ch_versions = ch_versions.mix(FASTQSCANPARSE_TRIM.out.versions.first())
     
     //
     // MODULE: Run kraken2
