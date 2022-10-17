@@ -1,33 +1,43 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process VCF2PSEUDOGENOME {
     tag "$meta.id"
-    label 'process_low'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
+    label 'process_medium'
 
-    conda (params.enable_conda ? 'bioconda::pysam=0.16.0.1 conda-forge::biopython=1.78' :  null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mulled-v2-3a59640f3fe1ed11819984087d31d68600200c3f:185a25ca79923df85b58f42deb48f5ac4481e91f-0"
-    } else {
-        container "quay.io/biocontainers/mulled-v2-3a59640f3fe1ed11819984087d31d68600200c3f:185a25ca79923df85b58f42deb48f5ac4481e91f-0"
-    }
+    conda (params.enable_conda ? 'bioconda::bcftools=1.14' : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/bcftools:1.14--h88f3f91_0' :
+        'quay.io/biocontainers/bcftools:1.14--h88f3f91_0' }"
 
     input:
     tuple val(meta), path(vcf)
     path reference
+    tuple val(meta), path(mask)
 
     output:
-    tuple val(meta), path("${meta.id}.fas"), emit: pseudogenome
+    tuple val(meta), path("*.fas"), emit: pseudogenome
+    path  "versions.yml"          , emit: versions
 
-    script: // This script is bundled with the pipeline, in nf-core/bactmap/bin/
-    def software = getSoftwareName(task.process)
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    vcf2pseudogenome.py  -r ${reference} -b ${vcf} -o ${meta.id}.fas
+    bcftools index \\
+        $args \\
+        $vcf
+    
+    bcftools consensus \\
+        $args \\
+        -f $reference \\
+        -e 'TYPE="indel"' \\
+        -m $mask \\
+        $vcf \\
+        | sed "/^>/ s/.*/>${prefix}/" > ${prefix}.fas
+        
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        bcftools: \$(bcftools --version 2>&1 | head -n1 | sed 's/^.*bcftools //; s/ .*\$//')
+    END_VERSIONS
     """
 }

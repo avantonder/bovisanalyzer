@@ -53,7 +53,8 @@ include { KRAKENPARSE                           } from '../modules/local/krakenp
 include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofiler_collate'
 include { SPOTYPING                             } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
-include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome_new'
+include { READ_STATS                            } from '../modules/local/read_stats'
+include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome'
 include { SEQTK_COMP                            } from '../modules/local/seqtk_comp'
 include { SEQTK_PARSE                           } from '../modules/local/seqtk_parse'
 include { METADATA_COLLATE                      } from '../modules/local/metadata_collate'
@@ -301,9 +302,22 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_flagstat_multiqc = BAM_SORT_SAMTOOLS.out.flagstat
-    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
+    ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
+    ch_depth_readstats    = BAM_SORT_SAMTOOLS.out.depth
+    ch_mapreads_readstats = BAM_SORT_SAMTOOLS.out.mapreads
+    ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
+    //
+    // MODULE: Run read_stats
+    //
+    READ_STATS (
+            FASTQSCANPARSE_RAW.out.tsv,
+            FASTQSCANPARSE_TRIM.out.tsv,
+            ch_depth_readstats.collect{it[1]}.ifEmpty([]),
+            ch_mapreads_readstats.collect{it[1]}.ifEmpty([])
+        )
+    ch_versions = ch_versions.mix(READ_STATS.out.versions.first())
+    
     //
     // SUBWORKFLOW: Call variants
     //
