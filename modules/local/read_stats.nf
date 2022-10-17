@@ -12,7 +12,10 @@ process READ_STATS {
     }
     
     input:
-    path json
+    path raw_tsv
+    path trim_tsv
+    path depth
+    path mapreads
 
     output:
     path "read_stats.csv", emit: csv
