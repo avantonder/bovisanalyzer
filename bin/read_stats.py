@@ -3,6 +3,7 @@
 import pandas as pd
 import numpy as np
 import glob
+import json
 
 # Reference length
 
@@ -20,23 +21,57 @@ minafttrim = 60 # require at least 60% reads to pass quality filtering steps
 
 # Parse raw fastq-scan results
 
-fastqscan_raw_df = pd.read_csv('raw_fastq-scan_summary.tsv', sep='\t')
+# Read in fastqscan json files
 
-fastqscan_raw_df = fastqscan_raw_df.iloc[:, [0,3]]
+raw_json_file = sorted(glob.glob('*.raw.json'))
 
-fastqscan_raw_df = fastqscan_raw_df.rename(columns = {'read_total' : 'NumRawReads', 'sample' : 'Sample'})
+raw_json_names = [i.replace('.raw.json', '') for i in raw_json_file]
 
-fastqscan_raw_df['Sample'] = fastqscan_raw_df['Sample'].str.replace('.raw', '')
+raw_json_names_df = pd.DataFrame(raw_json_names)
+
+raw_json_names_df.columns = ['Sample']
+
+raw_jsons_data = {}
+
+for index, file in enumerate(raw_json_file):
+    with open(file, 'r') as f:
+        raw_json_text = json.loads(f.read())
+        qc = raw_json_text['qc_stats']
+        raw_jsons_data[index] = qc
+
+raw_jsons_data_df = pd.DataFrame.from_dict(raw_jsons_data, orient = 'index')
+
+raw_json_merged_df = raw_json_names_df.join(raw_jsons_data_df)
+
+fastqscan_raw_df = raw_json_merged_df.iloc[:, [0,3]]
+
+fastqscan_raw_df = fastqscan_raw_df.rename(columns = {'read_total' : 'NumRawReads'})
 
 # Parse trimmed fastq-scan results
 
-fastqscan_trim_df = pd.read_csv('trim_fastq-scan_summary.tsv', sep='\t')
+trim_json_file = sorted(glob.glob('*.trim.json'))
 
-fastqscan_trim_df = fastqscan_trim_df.iloc[:, [0,3]]
+trim_json_names = [i.replace('.trim.json', '') for i in trim_json_file]
 
-fastqscan_trim_df = fastqscan_trim_df.rename(columns = {'read_total' : 'NumTrimReads', 'sample' : 'Sample'})
+trim_json_names_df = pd.DataFrame(trim_json_names)
 
-fastqscan_trim_df['Sample'] = fastqscan_trim_df['Sample'].str.replace('.trim', '')
+trim_json_names_df.columns = ['Sample']
+
+trim_jsons_data = {}
+
+for index, file in enumerate(trim_json_file):
+    with open(file, 'r') as f:
+        trim_json_text = json.loads(f.read())
+        qc = trim_json_text['qc_stats']
+        trim_jsons_data[index] = qc
+
+trim_jsons_data_df = pd.DataFrame.from_dict(trim_jsons_data, orient = 'index')
+
+trim_json_merged_df = trim_json_names_df.join(trim_jsons_data_df)
+
+fastqscan_trim_df = trim_json_merged_df.iloc[:, [0,3]]
+
+fastqscan_trim_df = fastqscan_trim_df.rename(columns = {'read_total' : 'NumTrimReads'})
 
 # Merge fastq-scan dataframes
 

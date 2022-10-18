@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import csv, pickle, operator, os, sys         
 import collections
 from functools import reduce
@@ -5,30 +7,15 @@ from functools import reduce
 #   parsing the arguments
 args=sys.argv
 
-if len(args)<2:
-    pathTBRuns=(os.path.dirname(os.getcwd()))
-    instats="*.csv"
-    pathPatterns="/Users/andries/Documents/HPC/Pipelines/btb-seq"
-    refName="Mycbovis-2122-97_LT708304.fas"
-    TBRun ="test"
-    qth=8
-    thMinGoodCov=2
-    thCovProp=0.2
-    thqualsnp=150
-    thqualnonsnp=0
-    strainVCF="*.vcf"
-else:    
-    pathTBRuns=(os.path.dirname(os.getcwd()))
-    instats=sys.argv[1]
-    pathPatterns=sys.argv[2]
-    refName=sys.argv[3]
-    TBRun=sys.argv[4]
-    qth=int(sys.argv[5])
-    thMinGoodCov=int(sys.argv[6])
-    thCovProp=float(sys.argv[7])
-    thqualsnp=int(sys.argv[8])
-    thqualnonsnp=int(sys.argv[9])
-    strainVCF=sys.argv[10]
+instats=sys.argv[1]
+strainVCF=sys.argv[2]
+TBRun=sys.argv[3]
+refName="Mycbovis-2122-97_LT708304.fas"
+qth=8
+thMinGoodCov=2
+thCovProp=0.2
+thqualsnp=150
+thqualnonsnp=0   
 
 patternsDetailsFile="CSSnewclusters_LT708304_230119.csv" #"CSSnewclusters_181115.csv" #"patterns20131220.csv" "CSSnewclusters_LT708304_181217.csv"
 patternsBritishBTBFile="patternsBritishBTB_LT708304.csv"
@@ -36,7 +23,6 @@ patternsPinnipediiFile="patternsPinnipedii_LT708304.csv"
 patternsMic_PinFile="patternsMic_Pin_LT708304.csv"
 patternsMicrotiFile="patternsMicroti_LT708304.csv"
 patternsBTBFile="patternsBTB_LT708304.csv"
-
 
 # reads a csv file
 # return a list where each element is a list containing the element of a row.
@@ -46,7 +32,6 @@ def readTable(fname,ch):
     dataOut = [row for row in data]
     infile.close()
     return dataOut
-
 
 # writes a list into a csv file
 # each element in the list is written as a row in the csv file
@@ -94,7 +79,7 @@ def comparePatterns(refPat,strPat,groPat):
 
 #this is the key part that runs the per sample stage1 genotyping
 
-def findGenotypeOneSample(strainsDetailsTittle,strainDetails,pathTBRuns,patternsDetails,patternsBritishBTBDetails,patternsBTBDetails,patternsMic_PinDetails,patternsMicrotiDetails,patternsPinnipediiDetails,refName,qth,pathAux,thMinGoodCov,thCovProp,thqualsnp,thqualnonsnp):    
+def findGenotypeOneSample(strainsDetailsTittle,strainDetails,patternsDetails,patternsBritishBTBDetails,patternsBTBDetails,patternsMic_PinDetails,patternsMicrotiDetails,patternsPinnipediiDetails,refName,qth,pathAux,thMinGoodCov,thCovProp,thqualsnp,thqualnonsnp):    
     pmeanCov=strainsDetailsTittle.index('MeanDepth')
     pfileName=strainsDetailsTittle.index('Sample')
     name=[strainDetails[pfileName]]
@@ -259,12 +244,12 @@ strainsDetails=listT([strainsInfo[pfileName][1:],strainsInfo[genomeCov][1:],stra
 strainsDetails=[['Sample','GenomeCov','MeanDepth','NumRawReads','pcMapped','Outcome',]]+strainsDetails
 print("Processing "+ str(len(strainsDetails))+" samples")
 
-patternsDetails=listT(readTable(os.path.join(pathPatterns,patternsDetailsFile),","))
-patternsBritishBTBDetails=listT(readTable(os.path.join(pathPatterns,patternsBritishBTBFile),","))
-patternsPinnipediiDetails=listT(readTable(os.path.join(pathPatterns,patternsPinnipediiFile),","))
-patternsMic_PinDetails=listT(readTable(os.path.join(pathPatterns,patternsMic_PinFile),","))
-patternsMicrotiDetails=listT(readTable(os.path.join(pathPatterns,patternsMicrotiFile),","))
-patternsBTBDetails=listT(readTable(os.path.join(pathPatterns,patternsBTBFile),","))
+patternsDetails=listT(readTable(patternsDetailsFile,","))
+patternsBritishBTBDetails=listT(readTable(patternsBritishBTBFile,","))
+patternsPinnipediiDetails=listT(readTable(patternsPinnipediiFile,","))
+patternsMic_PinDetails=listT(readTable(patternsMic_PinFile,","))
+patternsMicrotiDetails=listT(readTable(patternsMicrotiFile,","))
+patternsBTBDetails=listT(readTable(patternsBTBFile,","))
 
 
 maxPats=[strainsDetails[0]+["flag","group","CSSTested","matches","mismatches","noCoverage","anomalous"]]
@@ -274,7 +259,7 @@ outFileName="_stage1.csv"
 
 for strainDetails in strainsDetails[1:]:
     print(strainDetails)
-    [maxPat,strainQ]=findGenotypeOneSample(strainsDetails[0],strainDetails,pathTBRuns,patternsDetails,patternsBritishBTBDetails,patternsBTBDetails,patternsMic_PinDetails,patternsMicrotiDetails,patternsPinnipediiDetails,refName,qth,pathAux,thMinGoodCov,thCovProp,thqualsnp,thqualnonsnp)
+    [maxPat,strainQ]=findGenotypeOneSample(strainsDetails[0],strainDetails,patternsDetails,patternsBritishBTBDetails,patternsBTBDetails,patternsMic_PinDetails,patternsMicrotiDetails,patternsPinnipediiDetails,refName,qth,pathAux,thMinGoodCov,thCovProp,thqualsnp,thqualnonsnp)
     maxPats=maxPats+[maxPat]
     if strainQ!="NA":
         maxPatsQ=maxPatsQ+[strainQ]
