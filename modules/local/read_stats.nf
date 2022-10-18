@@ -1,5 +1,7 @@
 process READ_STATS {
     label 'process_low'
+    tag "$meta.id"
+
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
@@ -12,19 +14,21 @@ process READ_STATS {
     }
     
     input:
-    path raw_tsv
-    path trim_tsv
-    path depth
-    path mapreads
+    tuple val(meta), path(raw_json)
+    tuple val(meta), path(trim_json)
+    tuple val(meta), path(depth)
+    tuple val(meta), path(mapreads)
 
     output:
-    path "read_stats.csv", emit: csv
+    path "*.csv",          emit: csv
     path  "versions.yml",  emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
+    def prefix = task.ext.prefix ?: "${meta.id}"
     def parser_version = '1.0'
     """
     read_stats.py
+    mv read_stats.csv ${prefix}_read_stats.csv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         read_stats.py: ${parser_version}

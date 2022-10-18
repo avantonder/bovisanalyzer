@@ -26,17 +26,24 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",    checkIfExists: true)
-ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdbnew.bed",            checkIfExists: true)
-ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdbnew.dr.json",        checkIfExists: true)
-ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",          checkIfExists: true)
-ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",            checkIfExists: true)
-ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
-ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",          checkIfExists: true)
-ch_mask                  = file("$projectDir/assets/DataDrivenMerge20.bed",       checkIfExists: true)
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",          checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
+ch_tbdb_barcode           = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",                           checkIfExists: true)
+ch_tbdb_bed               = file("$projectDir/assets/tbdb/tbdbnew.bed",                                   checkIfExists: true)
+ch_tbdb_drjson            = file("$projectDir/assets/tbdb/tbdbnew.dr.json",                               checkIfExists: true)
+ch_tbdb_fasta             = file("$projectDir/assets/tbdb/tbdbnew.fasta",                                 checkIfExists: true)
+ch_tbdb_gff               = file("$projectDir/assets/tbdb/tbdbnew.gff",                                   checkIfExists: true)
+ch_tbdb_varjson           = file("$projectDir/assets/tbdb/tbdbnew.variables.json",                        checkIfExists: true)
+ch_tbdb_verjson           = file("$projectDir/assets/tbdb/tbdbnew.version.json",                          checkIfExists: true)
+ch_spoligotype_db         = file("$projectDir/assets/spoligotype_db.tsv",                                 checkIfExists: true)
+ch_discrimpos             = file("$projectDir/assets/DiscrimPos.tsv",                                     checkIfExists: true)
+ch_patternsDetailsFile    = file("$projectDir/assets/Stage1_patterns/CSSnewclusters_LT708304_230119.csv", checkIfExists: true)
+ch_patternsBritishBTBFile = file("$projectDir/assets/Stage1_patterns/patternsBritishBTB_LT708304.csv",    checkIfExists: true)
+ch_patternsPinnipediiFile = file("$projectDir/assets/Stage1_patterns/patternsPinnipedii_LT708304.csv",    checkIfExists: true)
+ch_patternsMic_PinFile    = file("$projectDir/assets/Stage1_patterns/patternsMic_Pin_LT708304.csv",       checkIfExists: true)
+ch_patternsMicrotiFile    = file("$projectDir/assets/Stage1_patterns/patternsMicroti_LT708304.csv",       checkIfExists: true)
+ch_patternsBTBFile        = file("$projectDir/assets/Stage1_patterns/patternsBTB_LT708304.csv",           checkIfExists: true)
+ch_mask                   = file("$projectDir/assets/DataDrivenMerge20.bed",                              checkIfExists: true)
+ch_multiqc_config         = file("$projectDir/assets/multiqc_config.yml",                                 checkIfExists: true)
+ch_multiqc_custom_config  = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +61,7 @@ include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofi
 include { SPOTYPING                             } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
 include { READ_STATS                            } from '../modules/local/read_stats'
+include { DEFINE_APHA_CLUSTER                   } from '../modules/local/define_apha_cluster'
 include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome'
 include { SEQTK_COMP                            } from '../modules/local/seqtk_comp'
 include { SEQTK_PARSE                           } from '../modules/local/seqtk_parse'
@@ -130,7 +138,7 @@ workflow BOVISANALYZER {
     // MODULE: Run fastqscanparse
     //
     FASTQSCANPARSE_RAW (
-            ch_fastqscanraw_fastqscanparse.collect{it[1]}.ifEmpty([])
+        ch_fastqscanraw_fastqscanparse.collect{it[1]}.ifEmpty([])
     )
     ch_versions = ch_versions.mix(FASTQSCANPARSE_RAW.out.versions.first())
 
@@ -218,9 +226,9 @@ workflow BOVISANALYZER {
     // MODULE: Run bracken
     //
     BRACKEN_BRACKEN (
-            ch_kraken2_bracken,
-            ch_brackendb
-        )
+        ch_kraken2_bracken,
+        ch_brackendb
+    )
     ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
     ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
 
@@ -228,9 +236,9 @@ workflow BOVISANALYZER {
     // MODULE: Run krakenparse
     //
     KRAKENPARSE (
-            ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
-            ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
-        )
+        ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
+        ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
+    )
     ch_kraken_metadata = KRAKENPARSE.out.composition
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
@@ -238,8 +246,8 @@ workflow BOVISANALYZER {
     // MODULE: Subsample reads
     //
     SUB_SAMPLING(
-            ch_variants_fastq
-        )
+        ch_variants_fastq
+    )
     ch_variants_fastq = SUB_SAMPLING.out.reads
     ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
 
@@ -248,15 +256,15 @@ workflow BOVISANALYZER {
     //
     //ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
-            ch_tbdb_barcode,
-            ch_tbdb_bed,
-            ch_tbdb_drjson,
-            ch_tbdb_fasta,
-            ch_tbdb_gff,
-            ch_tbdb_varjson,
-            ch_tbdb_verjson,
-            ch_variants_fastq
-        )
+        ch_tbdb_barcode,
+        ch_tbdb_bed,
+        ch_tbdb_drjson,
+        ch_tbdb_fasta,
+        ch_tbdb_gff,
+        ch_tbdb_varjson,
+        ch_tbdb_verjson,
+        ch_variants_fastq
+    )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
     ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
     
@@ -264,16 +272,16 @@ workflow BOVISANALYZER {
     // MODULE: Collate TB-profiler outputs
     //
     TBPROFILER_COLLATE(
-            ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
-        )
+        ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
+    )
     ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
 
     //
     // MODULE: Run SpoTyping
     //
     SPOTYPING (
-            ch_variants_fastq
-        )
+        ch_variants_fastq
+    )
     ch_spotyping_spoligoparse = SPOTYPING.out.txt
     ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
 
@@ -281,9 +289,9 @@ workflow BOVISANALYZER {
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
-            ch_spoligotype_db,
-            ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
-        )
+        ch_spoligotype_db,
+        ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
+    )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
         
@@ -303,19 +311,17 @@ workflow BOVISANALYZER {
         BWA_MEM.out.bam
     )
     ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
-    ch_depth_readstats    = BAM_SORT_SAMTOOLS.out.depth
-    ch_mapreads_readstats = BAM_SORT_SAMTOOLS.out.mapreads
     ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
     // MODULE: Run read_stats
     //
     READ_STATS (
-            FASTQSCANPARSE_RAW.out.tsv,
-            FASTQSCANPARSE_TRIM.out.tsv,
-            ch_depth_readstats.collect{it[1]}.ifEmpty([]),
-            ch_mapreads_readstats.collect{it[1]}.ifEmpty([])
-        )
+        FASTQSCAN_RAW.out.json,
+        FASTQSCAN_TRIM.out.json,
+        BAM_SORT_SAMTOOLS.out.depth,
+        BAM_SORT_SAMTOOLS.out.mapreads
+    )
     ch_versions = ch_versions.mix(READ_STATS.out.versions.first())
     
     //
@@ -323,11 +329,27 @@ workflow BOVISANALYZER {
     //
     VARIANTS_BCFTOOLS (
         BAM_SORT_SAMTOOLS.out.bam,
-        ch_reference
+        ch_reference,
+        ch_discrimpos
     )
     ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
     ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
+    //
+    // MODULE: Define APHA cluster
+    //
+    DEFINE_APHA_CLUSTER (
+        VARIANTS_BCFTOOLS.out.discrim_vcf,
+        READ_STATS.out.csv,
+        ch_patternsDetailsFile,
+        ch_patternsBritishBTBFile,
+        ch_patternsPinnipediiFile,
+        ch_patternsMic_PinFile,
+        ch_patternsMicrotiFile,
+        ch_patternsBTBFile
+    )
+    ch_versions = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
+    
     //
     // SUBWORKFLOW: Create mask bed file
     //
@@ -370,11 +392,11 @@ workflow BOVISANALYZER {
     // MODULE: Collate all metadata
     //
     METADATA_COLLATE (
-            ch_kraken_metadata,
-            ch_tbprofiler_metadata,
-            ch_spoligo_metadata,
-            ch_seqtk_metadata
-        )
+        ch_kraken_metadata,
+        ch_tbprofiler_metadata,
+        ch_spoligo_metadata,
+        ch_seqtk_metadata
+    )
     ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
     
     //
