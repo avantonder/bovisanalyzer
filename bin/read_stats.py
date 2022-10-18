@@ -26,6 +26,8 @@ fastqscan_raw_df = fastqscan_raw_df.iloc[:, [0,3]]
 
 fastqscan_raw_df = fastqscan_raw_df.rename(columns = {'read_total' : 'NumRawReads', 'sample' : 'Sample'})
 
+fastqscan_raw_df['Sample'] = fastqscan_raw_df['Sample'].str.replace('.raw', '')
+
 # Parse trimmed fastq-scan results
 
 fastqscan_trim_df = pd.read_csv('trim_fastq-scan_summary.tsv', sep='\t')
@@ -33,6 +35,8 @@ fastqscan_trim_df = pd.read_csv('trim_fastq-scan_summary.tsv', sep='\t')
 fastqscan_trim_df = fastqscan_trim_df.iloc[:, [0,3]]
 
 fastqscan_trim_df = fastqscan_trim_df.rename(columns = {'read_total' : 'NumTrimReads', 'sample' : 'Sample'})
+
+fastqscan_trim_df['Sample'] = fastqscan_trim_df['Sample'].str.replace('.trim', '')
 
 # Merge fastq-scan dataframes
 
@@ -64,7 +68,7 @@ fastqscan_mapped_read_df = pd.merge(fastqscan_merged, mapped_read_merged_df, on 
 
 # Calculate % of reads that mapped
 
-fastqscan_mapped_read_df['%Mapped'] = int(fastqscan_mapped_read_df['NumMappedReads']) / int(fastqscan_mapped_read_df['NumTrimReads']) * 100
+fastqscan_mapped_read_df['%Mapped'] = fastqscan_mapped_read_df['NumMappedReads'].astype(int) / fastqscan_mapped_read_df['NumTrimReads'].astype(int) * 100
 
 # Parse samtools depth files
 
