@@ -20,7 +20,7 @@ minafttrim = 60 # require at least 60% reads to pass quality filtering steps
 
 # Parse raw fastq-scan results
 
-fastqscan_raw_df = pd.read_csv('fastq-scan_summary_raw.tsv', sep='\t')
+fastqscan_raw_df = pd.read_csv('raw_fastq-scan_summary.tsv', sep='\t')
 
 fastqscan_raw_df = fastqscan_raw_df.iloc[:, [0,3]]
 
@@ -28,7 +28,7 @@ fastqscan_raw_df = fastqscan_raw_df.rename(columns = {'read_total' : 'NumRawRead
 
 # Parse trimmed fastq-scan results
 
-fastqscan_trim_df = pd.read_csv('fastq-scan_summary_trim.tsv', sep='\t')
+fastqscan_trim_df = pd.read_csv('trim_fastq-scan_summary.tsv', sep='\t')
 
 fastqscan_trim_df = fastqscan_trim_df.iloc[:, [0,3]]
 
