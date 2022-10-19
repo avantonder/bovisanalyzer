@@ -61,7 +61,9 @@ include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofi
 include { SPOTYPING                             } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
 include { READ_STATS                            } from '../modules/local/read_stats'
+include { READSTATS_PARSE                       } from '../modules/local/readstats_parse'
 include { DEFINE_APHA_CLUSTER                   } from '../modules/local/define_apha_cluster'
+include { CLUSTER_PARSE                         } from '../modules/local/cluster_parse'
 include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome'
 include { SEQTK_COMP                            } from '../modules/local/seqtk_comp'
 include { SEQTK_PARSE                           } from '../modules/local/seqtk_parse'
@@ -314,7 +316,7 @@ workflow BOVISANALYZER {
     ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
-    // MODULE: Run read_stats
+    // MODULE: Calculate read stats
     //
     READ_STATS (
         FASTQSCAN_RAW.out.json,
@@ -322,7 +324,16 @@ workflow BOVISANALYZER {
         BAM_SORT_SAMTOOLS.out.depth,
         BAM_SORT_SAMTOOLS.out.mapreads
     )
-    ch_versions = ch_versions.mix(READ_STATS.out.versions.first())
+    ch_readstats_readstatsparse = READ_STATS.out.csv
+    ch_versions                 = ch_versions.mix(READ_STATS.out.versions.first())
+
+    //
+    // MODULE: Summarise read stats outputs
+    //
+    READSTATS_PARSE (
+        ch_readstats_readstatsparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions           = ch_versions.mix(READSTATS_PARSE.out.versions.first())
     
     //
     // SUBWORKFLOW: Call variants
@@ -348,7 +359,17 @@ workflow BOVISANALYZER {
         ch_patternsMicrotiFile,
         ch_patternsBTBFile
     )
-    ch_versions = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
+    ch_cluster_clusterparse = DEFINE_APHA_CLUSTER.out.csv
+    ch_versions             = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
+    
+    //
+    // MODULE: Summarise APHA cluster outputs
+    //
+    CLUSTER_PARSE (
+        ch_cluster_clusterparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_cluster_metadata = CLUSTER_PARSE.out.tsv
+    ch_versions         = ch_versions.mix(SEQTK_PARSE.out.versions.first())
     
     //
     // SUBWORKFLOW: Create mask bed file
@@ -380,7 +401,7 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(SEQTK_COMP.out.versions.first())
 
     //
-    // MODULE: Calculate number of mapped positions in pseudogenome
+    // MODULE: Summarise seqtk outputs
     //
     SEQTK_PARSE (
         ch_seqtk_seqtkparse.collect{it[1]}.ifEmpty([])
@@ -395,6 +416,7 @@ workflow BOVISANALYZER {
         ch_kraken_metadata,
         ch_tbprofiler_metadata,
         ch_spoligo_metadata,
+        ch_cluster_metadata,
         ch_seqtk_metadata
     )
     ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())

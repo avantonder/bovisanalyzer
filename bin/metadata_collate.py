@@ -12,6 +12,8 @@ bracken_summary_df = pd.read_csv('species_composition.tsv', sep='\t')
 
 seqtk_summary_df = pd.read_csv('mapping_summary.tsv', sep='\t')
 
+cluster_summary_df = pd.read_csv('apha_cluster_summary.tsv', sep='\t')
+
 spoligo_summary_df_filter = spoligo_summary_df.iloc[:,0:2]
 
 tbprofiler_summary_df_filter = tbprofiler_summary_df.iloc[:,0:3]
@@ -22,11 +24,19 @@ bracken_summary_df_filter = bracken_summary_df_filter.rename(columns = {'name': 
 
 seqtk_summary_df_filter = seqtk_summary_df.iloc[:,[0,7]]
 
+cluster_summary_df_filter = cluster_summary_df[['Sample','MeanDepth', 'pcMapped', 'Outcome', 'flag', 'group']]
+
+cluster_summary_df_filter = cluster_summary_df_filter.rename(columns = {'Sample': 'sample'})
+
 bracken_tbprofiler_merge = pd.merge(bracken_summary_df_filter, tbprofiler_summary_df_filter, on = ['sample'])
 
 spoligo_merge = pd.merge(bracken_tbprofiler_merge, spoligo_summary_df_filter, on = ['sample'])
 
-all_merge = pd.merge(spoligo_merge, seqtk_summary_df_filter, on = ['sample'])
+spoligo_cluster_merge = pd.merge(spoligo_merge, cluster_summary_df_filter, on = ['sample'])
+
+all_merge = pd.merge(spoligo_cluster_merge, seqtk_summary_df_filter, on = ['sample'])
+
+all_merge = all_merge[['sample', 'Mycobacterium tuberculosis', 'main_lineage', 'sub_lineage', 'flag', 'group', 'SB number', 'MeanDepth', 'pcMapped', '%ref mapped', 'Outcome']]
 
 summary_file_name = 'metadata_summary.tsv'
 
