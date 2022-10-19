@@ -20,8 +20,8 @@ process READ_STATS {
     tuple val(meta), path(mapreads)
 
     output:
-    path "*.csv",          emit: csv
-    path  "versions.yml",  emit: versions
+    tuple val(meta), path("*.read_stats.csv"), emit: csv
+    path  "versions.yml",                      emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
     def prefix = task.ext.prefix ?: "${meta.id}"

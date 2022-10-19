@@ -1,6 +1,6 @@
 process DEFINE_APHA_CLUSTER {
-    label 'process_low'
     tag "$meta.id"
+    label 'process_low'
 
     conda (params.enable_conda ? "conda-forge::numpy=1.15.2 conda-forge::pandas=0.23.4 conda-forge::scipy=1.2.1" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -8,7 +8,7 @@ process DEFINE_APHA_CLUSTER {
         'quay.io/biocontainers/mulled-v2-9adca5a7d3b24119897cfc20386da6c7fa47bdab:77c1885b47edc369aceb4cccf161a549bdac3d4b-0' }"
 
     input:
-    tuple val(meta), path(readstats)
+    tuple val(meta), path(csv)
     tuple val(meta), path(vcf)
     path patternsDetailsFile
     path patternsBritishBTBFile
