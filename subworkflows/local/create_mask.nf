@@ -18,7 +18,13 @@ workflow CREATE_MASK {
     /*
      * MODULE Filter variants
      */
-    BCFTOOLS_FILTER ( bam_vcf )
+    bam_vcf
+        .map {
+            meta, bam, vcf -> [ meta, vcf ]
+        }
+        .set { ch_vcf }
+    
+    BCFTOOLS_FILTER ( ch_vcf )
     ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
     /*
      * MODULE Calculate zero coverage
