@@ -28,7 +28,7 @@ process READ_STATS {
     def parser_version = '1.0'
     """
     read_stats.py
-    mv read_stats.csv ${prefix}_read_stats.csv
+    mv read_stats.csv ${prefix}.read_stats.csv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         read_stats.py: ${parser_version}
