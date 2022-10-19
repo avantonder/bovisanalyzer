@@ -134,7 +134,8 @@ workflow BOVISANALYZER {
         INPUT_CHECK.out.reads
     )
     ch_fastqscanraw_fastqscanparse = FASTQSCAN_RAW.out.json
-    ch_versions = ch_versions.mix(FASTQSCAN_RAW.out.versions.first())
+    ch_fastqscanraw_readstats      = FASTQSCAN_RAW.out.json
+    ch_versions                    = ch_versions.mix(FASTQSCAN_RAW.out.versions.first())
 
     //
     // MODULE: Run fastqscanparse
@@ -199,7 +200,8 @@ workflow BOVISANALYZER {
         ch_variants_fastq
     )
     ch_fastqscantrim_fastqscanparse = FASTQSCAN_TRIM.out.json
-    ch_versions = ch_versions.mix(FASTQSCAN_TRIM.out.versions.first())
+    ch_fastqscantrim_readstats      = FASTQSCAN_TRIM.out.json
+    ch_versions                     = ch_versions.mix(FASTQSCAN_TRIM.out.versions.first())
 
     //
     // MODULE: Run fastqscanparse
@@ -312,6 +314,8 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
+    ch_depth_readstats    = BAM_SORT_SAMTOOLS.out.depth
+    ch_mapreads_readstats = BAM_SORT_SAMTOOLS.out.mapreads
     ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
     ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
@@ -319,12 +323,13 @@ workflow BOVISANALYZER {
     // MODULE: Calculate read stats
     //
     READ_STATS (
-        FASTQSCAN_RAW.out.json,
-        FASTQSCAN_TRIM.out.json,
-        BAM_SORT_SAMTOOLS.out.depth,
-        BAM_SORT_SAMTOOLS.out.mapreads
+        ch_fastqscanraw_readstats,
+        ch_fastqscantrim_readstats,
+        ch_depth_readstats,
+        ch_mapreads_readstats
     )
     ch_readstats_readstatsparse = READ_STATS.out.csv
+    ch_readstats_cluster        = READ_STATS.out.csv
     ch_versions                 = ch_versions.mix(READ_STATS.out.versions.first())
 
     //
@@ -343,6 +348,7 @@ workflow BOVISANALYZER {
         ch_reference,
         ch_discrimpos
     )
+    ch_bcftools_discrimvcf    = VARIANTS_BCFTOOLS.out.discrim_vcf
     ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
     ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
@@ -350,8 +356,8 @@ workflow BOVISANALYZER {
     // MODULE: Define APHA cluster
     //
     DEFINE_APHA_CLUSTER (
-        READ_STATS.out.csv,
-        VARIANTS_BCFTOOLS.out.discrim_vcf,
+        ch_readstats_cluster,
+        ch_bcftools_discrimvcf,
         ch_patternsDetailsFile,
         ch_patternsBritishBTBFile,
         ch_patternsPinnipediiFile,
