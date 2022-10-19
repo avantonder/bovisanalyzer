@@ -8,7 +8,7 @@ process BEDTOOLS_GENOMECOV {
         'quay.io/biocontainers/bedtools:2.30.0--hc088bd4_0' }"
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(vcf)
 
     output:
     tuple val(meta), path("*.bed"), emit: bed
