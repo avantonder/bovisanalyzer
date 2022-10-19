@@ -8,9 +8,8 @@ process VCF2PSEUDOGENOME {
         'quay.io/biocontainers/bcftools:1.14--h88f3f91_0' }"
 
     input:
-    tuple val(meta), path(vcf)
+    tuple val(meta), path(vcf), path(bed)
     path reference
-    tuple val(meta), path(mask)
 
     output:
     tuple val(meta), path("*.fas"), emit: pseudogenome
@@ -31,7 +30,7 @@ process VCF2PSEUDOGENOME {
         $args \\
         -f $reference \\
         -e 'TYPE="indel"' \\
-        -m $mask \\
+        -m $bed \\
         $vcf \\
         | sed "/^>/ s/.*/>${prefix}/" > ${prefix}.fas
         

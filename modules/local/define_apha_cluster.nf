@@ -8,8 +8,7 @@ process DEFINE_APHA_CLUSTER {
         'quay.io/biocontainers/mulled-v2-9adca5a7d3b24119897cfc20386da6c7fa47bdab:77c1885b47edc369aceb4cccf161a549bdac3d4b-0' }"
 
     input:
-    tuple val(meta), path(csv)
-    tuple val(meta), path(vcf)
+    tuple val(meta), path(csv), path(vcf)
     path patternsDetailsFile
     path patternsBritishBTBFile
     path patternsPinnipediiFile

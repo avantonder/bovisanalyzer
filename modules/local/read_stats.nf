@@ -14,10 +14,7 @@ process READ_STATS {
     }
     
     input:
-    tuple val(meta), path(raw_json)
-    tuple val(meta), path(trim_json)
-    tuple val(meta), path(depth)
-    tuple val(meta), path(mapreads)
+    tuple val(meta), path(json), path(json), path(depth), path(mapreads)
 
     output:
     tuple val(meta), path("*.read_stats.csv"), emit: csv

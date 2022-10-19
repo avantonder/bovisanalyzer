@@ -320,11 +320,11 @@ workflow BOVISANALYZER {
     //
     // MODULE: Calculate read stats
     //
-    ch_fastqscanraw_readstats
-        .join( FASTQSCAN_TRIM.out.json )
-        .join( BAM_SORT_SAMTOOLS.out.depth )
-        .join( BAM_SORT_SAMTOOLS.out.mapreads )
-        .set { ch_readstats }
+    ch_fastqscanraw_readstats                   // tuple val(meta), path(json)
+        .join( FASTQSCAN_TRIM.out.json )        // tuple val(meta), path(json) 
+        .join( BAM_SORT_SAMTOOLS.out.depth )    // tuple val(meta), path(depth)
+        .join( BAM_SORT_SAMTOOLS.out.mapreads ) // tuple val(meta), path(mapreads)
+        .set { ch_readstats }                   // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
 
     READ_STATS (
         ch_readstats
@@ -356,9 +356,9 @@ workflow BOVISANALYZER {
     //
     // MODULE: Define APHA cluster
     //
-    ch_readstats_cluster
-        .join( VARIANTS_BCFTOOLS.out.discrim_vcf )
-        .set { ch_apha_cluster }
+    ch_readstats_cluster                           // tuple val(meta), path(csv)
+        .join( VARIANTS_BCFTOOLS.out.discrim_vcf ) // tuple val(meta), path(vcf)
+        .set { ch_apha_cluster }                   // tuple val(meta), path(csv), path(vcf)
 
     DEFINE_APHA_CLUSTER (
         ch_apha_cluster,
@@ -384,9 +384,9 @@ workflow BOVISANALYZER {
     //
     // SUBWORKFLOW: Create mask bed file
     //
-    ch_bam_mask
-        .join( VARIANTS_BCFTOOLS.out.vcf )
-        .set { ch_bam_vcf_mask }
+    ch_bam_mask                            // tuple val(meta), path(bam)
+        .join( VARIANTS_BCFTOOLS.out.vcf ) // tuple val(meta), path(vcf)
+        .set { ch_bam_vcf_mask }           // tuple val(meta), path(bam), path(vcf)
     
     CREATE_MASK (
         ch_bam_vcf_mask,
@@ -397,9 +397,9 @@ workflow BOVISANALYZER {
     //
     // MODULE: Make pseudogenome from VCF
     //
-    ch_pseudo_vcf
-        .join( CREATE_MASK.out.mask_bed )
-        .set { ch_pseudogenome }
+    ch_pseudo_vcf                         // tuple val(meta), path(vcf)
+        .join( CREATE_MASK.out.mask_bed ) // tuple val(meta), path(bed)
+        .set { ch_pseudogenome }          // tuple val(meta), path(vcf), path(bed)
     
     VCF2PSEUDOGENOME (
         ch_pseudogenome,

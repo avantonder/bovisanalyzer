@@ -8,8 +8,7 @@ include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merg
 
 workflow CREATE_MASK {
     take:
-    bam       // channel: [ val(meta), [ bam ] ]
-    vcf       // channel: [ val(meta), [ vcf ] ]
+    tuple val(meta), path(bam), path(vcf)
     mask      // channel: /path/to/DataDrivenMerge20.bed
     
     main:
