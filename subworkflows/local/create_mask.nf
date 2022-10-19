@@ -8,8 +8,7 @@ include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merg
 
 workflow CREATE_MASK {
     take:
-    bam       // channel: [ val(meta), [ bam ] ]
-    vcf       // channel: [ val(meta), [ vcf ] ]
+    bam_vcf
     mask      // channel: /path/to/DataDrivenMerge20.bed
     
     main:
@@ -19,12 +18,12 @@ workflow CREATE_MASK {
     /*
      * MODULE Filter variants
      */
-    BCFTOOLS_FILTER ( vcf )
+    BCFTOOLS_FILTER ( bam_vcf )
     ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
     /*
      * MODULE Calculate zero coverage
      */
-    BEDTOOLS_GENOMECOV ( bam )
+    BEDTOOLS_GENOMECOV ( bam_vcf )
     ch_versions = ch_versions.mix(BEDTOOLS_GENOMECOV.out.versions.first())
     /*
      * MODULE Extract low quality regions
