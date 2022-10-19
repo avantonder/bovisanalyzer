@@ -369,7 +369,7 @@ workflow BOVISANALYZER {
         ch_cluster_clusterparse.collect{it[1]}.ifEmpty([])
     )
     ch_cluster_metadata = CLUSTER_PARSE.out.tsv
-    ch_versions         = ch_versions.mix(SEQTK_PARSE.out.versions.first())
+    ch_versions         = ch_versions.mix(CLUSTER_PARSE.out.versions.first())
     
     //
     // SUBWORKFLOW: Create mask bed file
