@@ -24,7 +24,7 @@ workflow VARIANTS_BCFTOOLS {
     /*
      * MODULE Filter discriminatory variants
      */
-    BCFTOOLS_VIEW ( BCFTOOLS_MPILEUP.out.vcf, tsv)
+    BCFTOOLS_VIEW ( BCFTOOLS_MPILEUP.out.vcf, BCFTOOLS_MPILEUP.out.tbi, tsv)
 
     emit:
     filtered_vcf     = BCFTOOLS_FILTER.out.vcf       // channel: [ val(meta), [ vcf ] ]

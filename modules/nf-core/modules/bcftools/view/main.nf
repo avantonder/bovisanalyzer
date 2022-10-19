@@ -9,6 +9,7 @@ process BCFTOOLS_VIEW {
 
     input:
     tuple val(meta), path(vcf)
+    tuple val(meta), path(tbi)
     path tsv
 
     output:
