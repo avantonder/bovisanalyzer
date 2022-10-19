@@ -339,8 +339,8 @@ workflow BOVISANALYZER {
     // MODULE: Define APHA cluster
     //
     DEFINE_APHA_CLUSTER (
-        VARIANTS_BCFTOOLS.out.discrim_vcf,
         READ_STATS.out.csv,
+        VARIANTS_BCFTOOLS.out.discrim_vcf,
         ch_patternsDetailsFile,
         ch_patternsBritishBTBFile,
         ch_patternsPinnipediiFile,
