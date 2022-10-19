@@ -29,7 +29,7 @@ process DEFINE_APHA_CLUSTER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def parser_version = '1.0'
     """
-    Stage1-test.py $readstats $vcf $prefix
+    Stage1-test.py $csv $vcf $prefix
     mv _stage1.csv ${prefix}_stage1.csv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
