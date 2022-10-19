@@ -164,7 +164,10 @@ def getSnpsStatsStrain(strainStatsFileName,listas,pathAux,thMinGoodCov,thCovProp
                 alt=line[3]
             else:
                 alt=line[4]
-            qual=float(line[5])
+            if line[5]==".":
+                qual=0
+            else:
+                qual=float(line[5])
             det=line[7].split(";")
             if "DP4=" in line[7]:
                 call="n"
