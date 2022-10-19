@@ -200,7 +200,6 @@ workflow BOVISANALYZER {
         ch_variants_fastq
     )
     ch_fastqscantrim_fastqscanparse = FASTQSCAN_TRIM.out.json
-    ch_fastqscantrim_readstats      = FASTQSCAN_TRIM.out.json
     ch_versions                     = ch_versions.mix(FASTQSCAN_TRIM.out.versions.first())
 
     //
@@ -314,19 +313,21 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_depth_readstats    = BAM_SORT_SAMTOOLS.out.depth
-    ch_mapreads_readstats = BAM_SORT_SAMTOOLS.out.mapreads
+    ch_bam_mask           = BAM_SORT_SAMTOOLS.out.bam
     ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
     ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
     // MODULE: Calculate read stats
     //
+    ch_fastqscanraw_readstats
+        .join( FASTQSCAN_TRIM.out.json )
+        .join( BAM_SORT_SAMTOOLS.out.depth )
+        .join( BAM_SORT_SAMTOOLS.out.mapreads )
+        .set { ch_readstats }
+
     READ_STATS (
-        ch_fastqscanraw_readstats,
-        ch_fastqscantrim_readstats,
-        ch_depth_readstats,
-        ch_mapreads_readstats
+        ch_readstats
     )
     ch_readstats_readstatsparse = READ_STATS.out.csv
     ch_readstats_cluster        = READ_STATS.out.csv
@@ -348,16 +349,19 @@ workflow BOVISANALYZER {
         ch_reference,
         ch_discrimpos
     )
-    ch_bcftools_discrimvcf    = VARIANTS_BCFTOOLS.out.discrim_vcf
+    ch_pseudo_vcf             = VARIANTS_BCFTOOLS.out.filtered_vcf
     ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
     ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
     //
     // MODULE: Define APHA cluster
     //
+    ch_readstats_cluster
+        .join( VARIANTS_BCFTOOLS.out.discrim_vcf )
+        .set { ch_apha_cluster }
+
     DEFINE_APHA_CLUSTER (
-        ch_readstats_cluster,
-        ch_bcftools_discrimvcf,
+        ch_apha_cluster,
         ch_patternsDetailsFile,
         ch_patternsBritishBTBFile,
         ch_patternsPinnipediiFile,
@@ -380,10 +384,12 @@ workflow BOVISANALYZER {
     //
     // SUBWORKFLOW: Create mask bed file
     //
-
+    ch_bam_mask
+        .join( VARIANTS_BCFTOOLS.out.vcf )
+        .set { ch_bam_vcf_mask }
+    
     CREATE_MASK (
-        BAM_SORT_SAMTOOLS.out.bam,
-        VARIANTS_BCFTOOLS.out.vcf,
+        ch_bam_vcf_mask,
         ch_mask
     )
     ch_versions = ch_versions.mix(CREATE_MASK.out.versions.first())
@@ -391,10 +397,13 @@ workflow BOVISANALYZER {
     //
     // MODULE: Make pseudogenome from VCF
     //
+    ch_pseudo_vcf
+        .join( CREATE_MASK.out.mask_bed )
+        .set { ch_pseudogenome }
+    
     VCF2PSEUDOGENOME (
-        VARIANTS_BCFTOOLS.out.filtered_vcf,
-        ch_reference,
-        CREATE_MASK.out.mask_bed
+        ch_pseudogenome,
+        ch_reference
     )
     
     //
