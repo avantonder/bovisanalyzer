@@ -17,7 +17,7 @@ process DEFINE_APHA_CLUSTER {
     path patternsBTBFile
 
     output:
-    path "*.csv",        emit: csv
+    path "*_stage1.csv", emit: csv
     path "versions.yml", emit: versions
 
     when:
