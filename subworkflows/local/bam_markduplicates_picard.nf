@@ -36,7 +36,7 @@ workflow BAM_MARKDUPLICATES_PICARD {
         }
         .set { ch_bam_bai }
 
-    BAM_STATS_SAMTOOLS ( ch_bam_bai, fasta )
+    BAM_STATS_SAMTOOLS ( ch_bam_bai )
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 
     emit:
