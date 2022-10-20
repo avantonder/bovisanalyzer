@@ -4,7 +4,7 @@
 
 include { PICARD_MARKDUPLICATES } from '../../modules/nf-core/modules/picard/markduplicates/main'
 include { SAMTOOLS_INDEX        } from '../../modules/nf-core/modules/samtools/index/main'
-include { BAM_STATS_SAMTOOLS    } from './bam_stats_samtools/main'
+include { BAM_STATS_SAMTOOLS    } from './bam_stats_samtools'
 
 workflow BAM_MARKDUPLICATES_PICARD {
 
