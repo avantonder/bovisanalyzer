@@ -369,7 +369,7 @@ workflow BOVISANALYZER {
     // SUBWORKFLOW: Call variants
     //
     VARIANTS_BCFTOOLS (
-        BAM_SORT_SAMTOOLS.out.bam,
+        BAM_MARKDUPLICATES_PICARD.out.bam,
         ch_reference,
         ch_discrimpos
     )
