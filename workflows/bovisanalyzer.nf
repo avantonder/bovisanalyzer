@@ -323,7 +323,9 @@ workflow BOVISANALYZER {
     // SUBWORKFLOW: Mark duplicate reads
     //
     BAM_MARKDUPLICATES_PICARD (
-        ch_bam
+        ch_bam,
+        ch_reference,
+        BWA_INDEX.out.index
     )
     ch_bam_mask                        = BAM_MARKDUPLICATES_PICARD.out.bam
     ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
