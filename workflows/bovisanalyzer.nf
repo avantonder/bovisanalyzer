@@ -344,11 +344,11 @@ workflow BOVISANALYZER {
     //
     // MODULE: Calculate read stats
     //
-    ch_fastqscanraw_readstats                        // tuple val(meta), path(json)
-        .join( FASTQSCAN_TRIM.out.json )             // tuple val(meta), path(json) 
-        .join( MARK_DUPLICATES_PICARD.out.depth )    // tuple val(meta), path(depth)
-        .join( MARK_DUPLICATES_PICARD.out.mapreads ) // tuple val(meta), path(mapreads)
-        .set { ch_readstats }                        // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
+    ch_fastqscanraw_readstats                           // tuple val(meta), path(json)
+        .join( FASTQSCAN_TRIM.out.json )                // tuple val(meta), path(json) 
+        .join( BAM_MARKDUPLICATES_PICARD.out.depth )    // tuple val(meta), path(depth)
+        .join( BAM_MARKDUPLICATES_PICARD.out.mapreads ) // tuple val(meta), path(mapreads)
+        .set { ch_readstats }                           // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
 
     READ_STATS (
         ch_readstats
