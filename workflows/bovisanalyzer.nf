@@ -73,6 +73,7 @@ include { ALIGNPSEUDOGENOMES                    } from '../modules/local/alignps
 include { INPUT_CHECK                           } from '../subworkflows/local/input_check'
 include { FASTQC_FASTP                          } from '../subworkflows/local/fastqc_fastp'
 include { BAM_SORT_SAMTOOLS                     } from '../subworkflows/local/bam_sort_samtools'
+include { MARK_DUPLICATES_PICARD                } from '../subworkflows/local/mark_duplicates_picard'
 include { VARIANTS_BCFTOOLS                     } from '../subworkflows/local/variants_bcftools'
 include { SUB_SAMPLING                          } from '../subworkflows/local/sub_sampling'
 include { CREATE_MASK                           } from '../subworkflows/local/create_mask'
@@ -93,6 +94,7 @@ include { BRACKEN_BRACKEN                                 } from '../modules/nf-
 include { BWA_INDEX                                       } from '../modules/nf-core/modules/bwa/index/main'
 include { TBPROFILER_PROFILE                              } from '../modules/nf-core/modules/tbprofiler/profile/main'
 include { BWA_MEM                                         } from '../modules/nf-core/modules/bwa/mem/main'
+include { PICARD_COLLECTMULTIPLEMETRICS                   } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main'
 include { SNPSITES                                        } from '../modules/nf-core/modules/snpsites/main'
 include { MULTIQC                                         } from '../modules/nf-core/modules/multiqc/main'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS } from '../modules/local/multiqc_tsv_from_list'
@@ -313,18 +315,38 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_bam_mask           = BAM_SORT_SAMTOOLS.out.bam
+    ch_bam                = BAM_SORT_SAMTOOLS.out.bam
     ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
     ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
     //
+    // SUBWORKFLOW: Mark duplicate reads
+    //
+    MARK_DUPLICATES_PICARD (
+        ch_bam
+    )
+    ch_bam_mask                        = MARK_DUPLICATES_PICARD.out.bam
+    ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
+    ch_versions                        = ch_versions.mix(MARK_DUPLICATES_PICARD.out.versions)
+
+    //
+    // MODULE: Picard metrics
+    //
+    PICARD_COLLECTMULTIPLEMETRICS (
+        ch_bam,
+        ch_reference,
+        []
+    )
+    ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
+    
+    //
     // MODULE: Calculate read stats
     //
-    ch_fastqscanraw_readstats                   // tuple val(meta), path(json)
-        .join( FASTQSCAN_TRIM.out.json )        // tuple val(meta), path(json) 
-        .join( BAM_SORT_SAMTOOLS.out.depth )    // tuple val(meta), path(depth)
-        .join( BAM_SORT_SAMTOOLS.out.mapreads ) // tuple val(meta), path(mapreads)
-        .set { ch_readstats }                   // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
+    ch_fastqscanraw_readstats                        // tuple val(meta), path(json)
+        .join( FASTQSCAN_TRIM.out.json )             // tuple val(meta), path(json) 
+        .join( MARK_DUPLICATES_PICARD.out.depth )    // tuple val(meta), path(depth)
+        .join( MARK_DUPLICATES_PICARD.out.mapreads ) // tuple val(meta), path(mapreads)
+        .set { ch_readstats }                        // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
 
     READ_STATS (
         ch_readstats
@@ -489,6 +511,7 @@ workflow BOVISANALYZER {
         FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
         ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
         ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
         ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()

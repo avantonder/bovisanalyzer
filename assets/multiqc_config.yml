@@ -29,10 +29,16 @@ module_order:
       info: "This section of the report shows Kraken 2 classification results for reads after adapter trimming with fastp."
   - samtools:
         name: 'MAPPING: SAMTools (raw)'
-        anchor: 'samtools'
+        anchor: 'samtools_bwa'
         info: 'This section of the report shows SAMTools counts/statistics after mapping with BWA.'
         path_filters:
             - './samtools/*'
+  - samtools:
+        name: 'VARIANTS: SAMTools (MarkDuplicates)'
+        anchor: 'samtools_markduplicates'
+        info: 'This section of the report shows SAMTools counts/statistics after duplicate removal with picard MarkDuplicates.'
+        path_filters:
+            - './picard_markduplicates/*' 
   - bcftools:
         name: 'VARIANTS: BCFTools (BCFTools)'
         anchor: 'bcftools'
