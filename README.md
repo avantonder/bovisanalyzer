@@ -22,14 +22,16 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 7. Downsample fastq files ([`Rasusa`](https://github.com/mbhall88/rasusa))
 8. Detect drug resistance and lineage ([`TB-Profiler`](https://github.com/jodyphelan/TBProfiler))
 9. Detect spoligotype ([`SpoTyping`](https://github.com/xiaeryu/SpoTyping-v2.0))
-10. Variant calling
+10. Assign GB WGS clade ([`APHA-CSU`](https://github.com/APHA-CSU/btb-seq))
+11. Variant calling
     1. Read mapping ([`BWA mem`](https://github.com/lh3/bwa))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    3. Call and filter variants ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
-    4. Convert filtered bcf to pseudogenome fasta ([`vcf2pseudogenome.py`](https://github.com/nf-core/bactmap/blob/dev/bin/vcf2pseudogenome.py))
-    5. Calculate the percentage of the reference mapped in each pseudogenome fasta ([`seqtk`](https://github.com/lh3/seqtk))
-11. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
-12. Mask alignment using coordinates from [Price *et al* 2018](https://pubmed.ncbi.nlm.nih.gov/30425997/) ([`remove_blocks_from_aln`](https://github.com/sanger-pathogens/remove_blocks_from_aln))
+    3. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/))
+    4. Call and filter variants ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
+    5. Convert filtered bcf to pseudogenome fasta ([`vcf2pseudogenome.py`](https://github.com/nf-core/bactmap/blob/dev/bin/vcf2pseudogenome.py))
+    6. Mask each pseudogenome with zero-coverage, low coverage and poorly mapped regions ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
+    7. Calculate the percentage of the reference mapped in each pseudogenome fasta ([`seqtk`](https://github.com/lh3/seqtk))
+12. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
 13. Extract variant sites from alignment ([`SNP-sites`](https://github.com/sanger-pathogens/snp-sites))
 14. Summarise fastq metrics, species composition and genotyping
 15. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
