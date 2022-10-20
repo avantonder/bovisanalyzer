@@ -73,7 +73,7 @@ include { ALIGNPSEUDOGENOMES                    } from '../modules/local/alignps
 include { INPUT_CHECK                           } from '../subworkflows/local/input_check'
 include { FASTQC_FASTP                          } from '../subworkflows/local/fastqc_fastp'
 include { BAM_SORT_SAMTOOLS                     } from '../subworkflows/local/bam_sort_samtools'
-include { MARK_DUPLICATES_PICARD                } from '../subworkflows/local/mark_duplicates_picard'
+include { BAM_MARKDUPLICATES_PICARD             } from '../subworkflows/local/bam_markduplicates_picard'
 include { VARIANTS_BCFTOOLS                     } from '../subworkflows/local/variants_bcftools'
 include { SUB_SAMPLING                          } from '../subworkflows/local/sub_sampling'
 include { CREATE_MASK                           } from '../subworkflows/local/create_mask'
@@ -322,12 +322,12 @@ workflow BOVISANALYZER {
     //
     // SUBWORKFLOW: Mark duplicate reads
     //
-    MARK_DUPLICATES_PICARD (
+    BAM_MARKDUPLICATES_PICARD (
         ch_bam
     )
-    ch_bam_mask                        = MARK_DUPLICATES_PICARD.out.bam
-    ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
-    ch_versions                        = ch_versions.mix(MARK_DUPLICATES_PICARD.out.versions)
+    ch_bam_mask                        = BAM_MARKDUPLICATES_PICARD.out.bam
+    ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
+    ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
 
     //
     // MODULE: Picard metrics
