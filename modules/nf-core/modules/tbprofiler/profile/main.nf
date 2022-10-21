@@ -3,6 +3,8 @@ process TBPROFILER_PROFILE {
     label 'process_high'
     label 'error_retry'
 
+    // DO NOT CHANGE VERSION!!
+    
     conda (params.enable_conda ? "bioconda::tb-profiler=4.1.1" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/tb-profiler:4.1.1--pypyh5e36f6f_1' :

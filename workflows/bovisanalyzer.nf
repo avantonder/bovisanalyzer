@@ -339,7 +339,8 @@ workflow BOVISANALYZER {
         ch_reference,
         []
     )
-    ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
+    ch_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+    ch_versions                       = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
     
     //
     // MODULE: Calculate read stats
@@ -514,6 +515,7 @@ workflow BOVISANALYZER {
         ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
         ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
         ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
         ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()

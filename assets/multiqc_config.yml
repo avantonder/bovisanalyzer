@@ -13,6 +13,8 @@ run_modules:
   - fastp
   - kraken
   - samtools
+  - picard
+  - samtools
   - bcftools
 
 module_order:
@@ -33,12 +35,18 @@ module_order:
         info: 'This section of the report shows SAMTools counts/statistics after mapping with BWA.'
         path_filters:
             - './samtools/*'
+  - picard:
+        name: 'METRICS: Picard (raw)'
+        anchor: 'picard'
+        info: 'This section of the report shows Picard CollectMultipleMetrics after mapping with BWA.'
+        path_filters:
+            - './picard_metrics/*'
   - samtools:
         name: 'VARIANTS: SAMTools (MarkDuplicates)'
         anchor: 'samtools_markduplicates'
         info: 'This section of the report shows SAMTools counts/statistics after duplicate removal with picard MarkDuplicates.'
         path_filters:
-            - './picard_markduplicates/*' 
+            - './samtools/*' 
   - bcftools:
         name: 'VARIANTS: BCFTools (BCFTools)'
         anchor: 'bcftools'
