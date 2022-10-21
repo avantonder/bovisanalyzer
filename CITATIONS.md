@@ -13,11 +13,16 @@
 - [bcftools](https://www.ncbi.nlm.nih.gov/pubmed/21903627/)
   > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics. 2011 Nov 1;27(21):2987-93. doi: 10.1093/bioinformatics/btr509. Epub 2011 Sep 8. PubMed PMID: 21903627; PubMed Central PMCID: PMC3198575.
 
+- [bedtools](https://pubmed.ncbi.nlm.nih.gov/20110278/)
+  > Quinlan AR, Hall IM. BEDTools: a flexible suite of utilities for comparing genomic features. Bioinformatics. 2010 Mar 15;26(6):841-2. doi: 10.1093/bioinformatics/btq033. Epub 2010 Jan 28. PMID: 20110278; PMCID: PMC2832824
+
 - [Bracken](https://peerj.com/articles/cs-104/)
   > Lu J, Breitwieser FP, Thielen P, Salzberg SL. Bracken: estimating species abundance in metagenomics data. PeerJ Computer Science. 2017: 3:e104. doi: 10.7717/peerj-cs.104.
 
 - [BWA](https://pubmed.ncbi.nlm.nih.gov/19451168/)
   > Li H, Durbin R. Fast and accurate short read alignment with Burrows-Wheeler transform. Bioinformatics. 2009 Jul 15;25(14):1754-60. doi: 10.1093/bioinformatics/btp324. Epub 2009 May 18. PMID: 19451168; PMCID: PMC2705234.
+
+- [GB clusters](https://github.com/APHA-CSU/btb-seq)
 
 - [fastp](https://www.ncbi.nlm.nih.gov/pubmed/30423086/)
   > Chen S, Zhou Y, Chen Y, Gu J. fastp: an ultra-fast all-in-one FASTQ preprocessor. Bioinformatics. 2018 Sep 1;34(17):i884-i890. doi: 10.1093/bioinformatics/bty560. PubMed PMID: 30423086; PubMed Central PMCID: PMC6129281.
@@ -34,8 +39,6 @@
 
 - [Rasusa](https://github.com/mbhall88/rasusa)
   > Hall MB. Rasusa: Randomly subsample sequencing reads to a specified coverage. 2019. doi:10.5281/zenodo.3731394
-
-- [remove_blocks_from_aln](https://github.com/sanger-pathogens/remove_blocks_from_aln)
 
 - [samtools](https://www.ncbi.nlm.nih.gov/pubmed/19505943/)
   > Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R; 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-9. doi: 10.1093/bioinformatics/btp352. Epub 2009 Jun 8. PubMed PMID: 19505943; PubMed Central PMCID: PMC2723002.
