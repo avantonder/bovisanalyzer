@@ -15,13 +15,15 @@ process FASTQSCANPARSE {
     path json
 
     output:
-    path "fastq-scan_summary.tsv", emit: tsv
-    path  "versions.yml"         , emit: versions
+    path("*.tsv"),         emit: tsv
+    path  "versions.yml" , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
+    def prefix = task.ext.prefix ?: ''
     def parser_version = '1.0'
     """
     fastqscan_parser.py
+    mv fastq-scan_summary.tsv ${prefix}_fastq-scan_summary.tsv
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         fastqscan_parser.py: ${parser_version}

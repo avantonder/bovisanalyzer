@@ -26,17 +26,24 @@ if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_tbdb_barcode          = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",    checkIfExists: true)
-ch_tbdb_bed              = file("$projectDir/assets/tbdb/tbdbnew.bed",            checkIfExists: true)
-ch_tbdb_drjson           = file("$projectDir/assets/tbdb/tbdbnew.dr.json",        checkIfExists: true)
-ch_tbdb_fasta            = file("$projectDir/assets/tbdb/tbdbnew.fasta",          checkIfExists: true)
-ch_tbdb_gff              = file("$projectDir/assets/tbdb/tbdbnew.gff",             checkIfExists: true)
-ch_tbdb_varjson          = file("$projectDir/assets/tbdb/tbdbnew.variables.json", checkIfExists: true)
-ch_tbdb_verjson          = file("$projectDir/assets/tbdb/tbdbnew.version.json",   checkIfExists: true)
-ch_spoligotype_db        = file("$projectDir/assets/spoligotype_db.tsv",       checkIfExists: true)
-ch_tab                   = file("$projectDir/assets/AF2122_region_exclude",    checkIfExists: true)
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml",       checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
+ch_tbdb_barcode           = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",                           checkIfExists: true)
+ch_tbdb_bed               = file("$projectDir/assets/tbdb/tbdbnew.bed",                                   checkIfExists: true)
+ch_tbdb_drjson            = file("$projectDir/assets/tbdb/tbdbnew.dr.json",                               checkIfExists: true)
+ch_tbdb_fasta             = file("$projectDir/assets/tbdb/tbdbnew.fasta",                                 checkIfExists: true)
+ch_tbdb_gff               = file("$projectDir/assets/tbdb/tbdbnew.gff",                                   checkIfExists: true)
+ch_tbdb_varjson           = file("$projectDir/assets/tbdb/tbdbnew.variables.json",                        checkIfExists: true)
+ch_tbdb_verjson           = file("$projectDir/assets/tbdb/tbdbnew.version.json",                          checkIfExists: true)
+ch_spoligotype_db         = file("$projectDir/assets/spoligotype_db.tsv",                                 checkIfExists: true)
+ch_discrimpos             = file("$projectDir/assets/DiscrimPos.tsv",                                     checkIfExists: true)
+ch_patternsDetailsFile    = file("$projectDir/assets/Stage1_patterns/CSSnewclusters_LT708304_230119.csv", checkIfExists: true)
+ch_patternsBritishBTBFile = file("$projectDir/assets/Stage1_patterns/patternsBritishBTB_LT708304.csv",    checkIfExists: true)
+ch_patternsPinnipediiFile = file("$projectDir/assets/Stage1_patterns/patternsPinnipedii_LT708304.csv",    checkIfExists: true)
+ch_patternsMic_PinFile    = file("$projectDir/assets/Stage1_patterns/patternsMic_Pin_LT708304.csv",       checkIfExists: true)
+ch_patternsMicrotiFile    = file("$projectDir/assets/Stage1_patterns/patternsMicroti_LT708304.csv",       checkIfExists: true)
+ch_patternsBTBFile        = file("$projectDir/assets/Stage1_patterns/patternsBTB_LT708304.csv",           checkIfExists: true)
+ch_mask                   = file("$projectDir/assets/DataDrivenMerge20.bed",                              checkIfExists: true)
+ch_multiqc_config         = file("$projectDir/assets/multiqc_config.yml",                                 checkIfExists: true)
+ch_multiqc_custom_config  = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,23 +54,29 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { FASTQSCANPARSE              } from '../modules/local/fastqscanparse'
-include { KRAKENPARSE                 } from '../modules/local/krakenparse'
-include { TBPROFILER_COLLATE          } from '../modules/local/tbprofiler_collate'
-include { SPOTYPING                   } from '../modules/local/spotyping'
-include { SPOLIGOPARSE                } from '../modules/local/spoligoparse'
-include { VCF2PSEUDOGENOME            } from '../modules/local/vcf2pseudogenome'
-include { SEQTK_COMP                  } from '../modules/local/seqtk_comp'
-include { SEQTK_PARSE                 } from '../modules/local/seqtk_parse'
-include { METADATA_COLLATE            } from '../modules/local/metadata_collate'
-include { ALIGNPSEUDOGENOMES          } from '../modules/local/alignpseudogenomes'
-include { REMOVE_BLOCKS               } from '../modules/local/removeblocks'
+include { FASTQSCANPARSE as FASTQSCANPARSE_RAW  } from '../modules/local/fastqscanparse'
+include { FASTQSCANPARSE as FASTQSCANPARSE_TRIM } from '../modules/local/fastqscanparse'
+include { KRAKENPARSE                           } from '../modules/local/krakenparse'
+include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofiler_collate'
+include { SPOTYPING                             } from '../modules/local/spotyping'
+include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
+include { READ_STATS                            } from '../modules/local/read_stats'
+include { READSTATS_PARSE                       } from '../modules/local/readstats_parse'
+include { DEFINE_APHA_CLUSTER                   } from '../modules/local/define_apha_cluster'
+include { CLUSTER_PARSE                         } from '../modules/local/cluster_parse'
+include { VCF2PSEUDOGENOME                      } from '../modules/local/vcf2pseudogenome'
+include { SEQTK_COMP                            } from '../modules/local/seqtk_comp'
+include { SEQTK_PARSE                           } from '../modules/local/seqtk_parse'
+include { METADATA_COLLATE                      } from '../modules/local/metadata_collate'
+include { ALIGNPSEUDOGENOMES                    } from '../modules/local/alignpseudogenomes'
 
-include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { FASTQC_FASTP                } from '../subworkflows/local/fastqc_fastp'
-include { BAM_SORT_SAMTOOLS           } from '../subworkflows/local/bam_sort_samtools'
-include { VARIANTS_BCFTOOLS           } from '../subworkflows/local/variants_bcftools'
-include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling'
+include { INPUT_CHECK                           } from '../subworkflows/local/input_check'
+include { FASTQC_FASTP                          } from '../subworkflows/local/fastqc_fastp'
+include { BAM_SORT_SAMTOOLS                     } from '../subworkflows/local/bam_sort_samtools'
+include { BAM_MARKDUPLICATES_PICARD             } from '../subworkflows/local/bam_markduplicates_picard'
+include { VARIANTS_BCFTOOLS                     } from '../subworkflows/local/variants_bcftools'
+include { SUB_SAMPLING                          } from '../subworkflows/local/sub_sampling'
+include { CREATE_MASK                           } from '../subworkflows/local/create_mask'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,16 +87,18 @@ include { SUB_SAMPLING                } from '../subworkflows/local/sub_sampling
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQSCAN                                               } from '../modules/nf-core/modules/fastqscan/main'
-include { KRAKEN2_KRAKEN2                                         } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { BRACKEN_BRACKEN                                         } from '../modules/nf-core/modules/bracken/bracken/main'
-include { BWA_INDEX                                               } from '../modules/nf-core/modules/bwa/index/main'
-include { TBPROFILER_PROFILE                                      } from '../modules/nf-core/modules/tbprofiler/profile/main'
-include { BWA_MEM                                                 } from '../modules/nf-core/modules/bwa/mem/main'
-include { SNPSITES                                                } from '../modules/nf-core/modules/snpsites/main'
-include { MULTIQC                                                 } from '../modules/nf-core/modules/multiqc/main'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
-include { CUSTOM_DUMPSOFTWAREVERSIONS                             } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
+include { FASTQSCAN as FASTQSCAN_RAW                      } from '../modules/nf-core/modules/fastqscan/main'
+include { FASTQSCAN as FASTQSCAN_TRIM                     } from '../modules/nf-core/modules/fastqscan/main'
+include { KRAKEN2_KRAKEN2                                 } from '../modules/nf-core/modules/kraken2/kraken2/main'
+include { BRACKEN_BRACKEN                                 } from '../modules/nf-core/modules/bracken/bracken/main'
+include { BWA_INDEX                                       } from '../modules/nf-core/modules/bwa/index/main'
+include { TBPROFILER_PROFILE                              } from '../modules/nf-core/modules/tbprofiler/profile/main'
+include { BWA_MEM                                         } from '../modules/nf-core/modules/bwa/mem/main'
+include { PICARD_COLLECTMULTIPLEMETRICS                   } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main'
+include { SNPSITES                                        } from '../modules/nf-core/modules/snpsites/main'
+include { MULTIQC                                         } from '../modules/nf-core/modules/multiqc/main'
+include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS } from '../modules/local/multiqc_tsv_from_list'
+include { CUSTOM_DUMPSOFTWAREVERSIONS                     } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main' 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,19 +132,20 @@ workflow BOVISANALYZER {
     //
     // MODULE: Run fastq-scan
     //
-    FASTQSCAN (
+    FASTQSCAN_RAW (
         INPUT_CHECK.out.reads
     )
-    ch_fastqscan_fastqscanparse = FASTQSCAN.out.json
-    ch_versions = ch_versions.mix(FASTQSCAN.out.versions.first())
+    ch_fastqscanraw_fastqscanparse = FASTQSCAN_RAW.out.json
+    ch_fastqscanraw_readstats      = FASTQSCAN_RAW.out.json
+    ch_versions                    = ch_versions.mix(FASTQSCAN_RAW.out.versions.first())
 
     //
     // MODULE: Run fastqscanparse
     //
-    FASTQSCANPARSE (
-            ch_fastqscan_fastqscanparse.collect{it[1]}.ifEmpty([])
+    FASTQSCANPARSE_RAW (
+        ch_fastqscanraw_fastqscanparse.collect{it[1]}.ifEmpty([])
     )
-    ch_versions = ch_versions.mix(FASTQSCANPARSE.out.versions.first())
+    ch_versions = ch_versions.mix(FASTQSCANPARSE_RAW.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
@@ -180,6 +196,23 @@ workflow BOVISANALYZER {
     }
 
     //
+    // MODULE: Run fastq-scan
+    //
+    FASTQSCAN_TRIM (
+        ch_variants_fastq
+    )
+    ch_fastqscantrim_fastqscanparse = FASTQSCAN_TRIM.out.json
+    ch_versions                     = ch_versions.mix(FASTQSCAN_TRIM.out.versions.first())
+
+    //
+    // MODULE: Run fastqscanparse
+    //
+    FASTQSCANPARSE_TRIM (
+            ch_fastqscantrim_fastqscanparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions = ch_versions.mix(FASTQSCANPARSE_TRIM.out.versions.first())
+    
+    //
     // MODULE: Run kraken2
     //  
     ch_kraken2_multiqc = Channel.empty()
@@ -198,9 +231,9 @@ workflow BOVISANALYZER {
     // MODULE: Run bracken
     //
     BRACKEN_BRACKEN (
-            ch_kraken2_bracken,
-            ch_brackendb
-        )
+        ch_kraken2_bracken,
+        ch_brackendb
+    )
     ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
     ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
 
@@ -208,9 +241,9 @@ workflow BOVISANALYZER {
     // MODULE: Run krakenparse
     //
     KRAKENPARSE (
-            ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
-            ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
-        )
+        ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
+        ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
+    )
     ch_kraken_metadata = KRAKENPARSE.out.composition
     ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
 
@@ -218,8 +251,8 @@ workflow BOVISANALYZER {
     // MODULE: Subsample reads
     //
     SUB_SAMPLING(
-            ch_variants_fastq
-        )
+        ch_variants_fastq
+    )
     ch_variants_fastq = SUB_SAMPLING.out.reads
     ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
 
@@ -228,15 +261,15 @@ workflow BOVISANALYZER {
     //
     //ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
-            ch_tbdb_barcode,
-            ch_tbdb_bed,
-            ch_tbdb_drjson,
-            ch_tbdb_fasta,
-            ch_tbdb_gff,
-            ch_tbdb_varjson,
-            ch_tbdb_verjson,
-            ch_variants_fastq
-        )
+        ch_tbdb_barcode,
+        ch_tbdb_bed,
+        ch_tbdb_drjson,
+        ch_tbdb_fasta,
+        ch_tbdb_gff,
+        ch_tbdb_varjson,
+        ch_tbdb_verjson,
+        ch_variants_fastq
+    )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
     ch_versions = ch_versions.mix(TBPROFILER_PROFILE.out.versions.first())
     
@@ -244,16 +277,16 @@ workflow BOVISANALYZER {
     // MODULE: Collate TB-profiler outputs
     //
     TBPROFILER_COLLATE(
-            ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
-        )
+        ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
+    )
     ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
 
     //
     // MODULE: Run SpoTyping
     //
     SPOTYPING (
-            ch_variants_fastq
-        )
+        ch_variants_fastq
+    )
     ch_spotyping_spoligoparse = SPOTYPING.out.txt
     ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
 
@@ -261,9 +294,9 @@ workflow BOVISANALYZER {
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
-            ch_spoligotype_db,
-            ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
-        )
+        ch_spoligotype_db,
+        ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
+    )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())
         
@@ -282,24 +315,119 @@ workflow BOVISANALYZER {
     BAM_SORT_SAMTOOLS (
         BWA_MEM.out.bam
     )
-    ch_flagstat_multiqc = BAM_SORT_SAMTOOLS.out.flagstat
-    ch_versions         = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
+    ch_bam                = BAM_SORT_SAMTOOLS.out.bam
+    ch_flagstat_multiqc   = BAM_SORT_SAMTOOLS.out.flagstat
+    ch_versions           = ch_versions.mix(BAM_SORT_SAMTOOLS.out.versions.first())
 
+    //
+    // SUBWORKFLOW: Mark duplicate reads
+    //
+    BAM_MARKDUPLICATES_PICARD (
+        ch_bam,
+        ch_reference,
+        BWA_INDEX.out.index
+    )
+    ch_bam_mask                        = BAM_MARKDUPLICATES_PICARD.out.bam
+    ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
+    ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
+
+    //
+    // MODULE: Picard metrics
+    //
+    PICARD_COLLECTMULTIPLEMETRICS (
+        ch_bam,
+        ch_reference,
+        []
+    )
+    ch_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+    ch_versions                       = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
+    
+    //
+    // MODULE: Calculate read stats
+    //
+    ch_fastqscanraw_readstats                           // tuple val(meta), path(json)
+        .join( FASTQSCAN_TRIM.out.json )                // tuple val(meta), path(json) 
+        .join( BAM_MARKDUPLICATES_PICARD.out.depth )    // tuple val(meta), path(depth)
+        .join( BAM_MARKDUPLICATES_PICARD.out.mapreads ) // tuple val(meta), path(mapreads)
+        .set { ch_readstats }                           // tuple val(meta), path(json), path(json), path(depth), path(mapreads)
+
+    READ_STATS (
+        ch_readstats
+    )
+    ch_readstats_readstatsparse = READ_STATS.out.csv
+    ch_readstats_cluster        = READ_STATS.out.csv
+    ch_versions                 = ch_versions.mix(READ_STATS.out.versions.first())
+
+    //
+    // MODULE: Summarise read stats outputs
+    //
+    READSTATS_PARSE (
+        ch_readstats_readstatsparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_versions           = ch_versions.mix(READSTATS_PARSE.out.versions.first())
+    
     //
     // SUBWORKFLOW: Call variants
     //
     VARIANTS_BCFTOOLS (
-        BAM_SORT_SAMTOOLS.out.bam,
-        ch_reference
+        BAM_MARKDUPLICATES_PICARD.out.bam,
+        ch_reference,
+        ch_discrimpos
     )
+    ch_pseudo_vcf             = VARIANTS_BCFTOOLS.out.filtered_vcf
     ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
     ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first())
 
     //
+    // MODULE: Define APHA cluster
+    //
+    ch_readstats_cluster                           // tuple val(meta), path(csv)
+        .join( VARIANTS_BCFTOOLS.out.discrim_vcf ) // tuple val(meta), path(vcf)
+        .set { ch_apha_cluster }                   // tuple val(meta), path(csv), path(vcf)
+
+    DEFINE_APHA_CLUSTER (
+        ch_apha_cluster,
+        ch_patternsDetailsFile,
+        ch_patternsBritishBTBFile,
+        ch_patternsPinnipediiFile,
+        ch_patternsMic_PinFile,
+        ch_patternsMicrotiFile,
+        ch_patternsBTBFile
+    )
+    ch_cluster_clusterparse = DEFINE_APHA_CLUSTER.out.csv
+    ch_versions             = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
+    
+    //
+    // MODULE: Summarise APHA cluster outputs
+    //
+    CLUSTER_PARSE (
+        ch_cluster_clusterparse.collect{it[1]}.ifEmpty([])
+    )
+    ch_cluster_metadata = CLUSTER_PARSE.out.tsv
+    ch_versions         = ch_versions.mix(CLUSTER_PARSE.out.versions.first())
+    
+    //
+    // SUBWORKFLOW: Create mask bed file
+    //
+    ch_bam_mask                            // tuple val(meta), path(bam)
+        .join( VARIANTS_BCFTOOLS.out.vcf ) // tuple val(meta), path(vcf)
+        .set { ch_bam_vcf_mask }           // tuple val(meta), path(bam), path(vcf)
+    
+    CREATE_MASK (
+        ch_bam_vcf_mask,
+        ch_mask
+    )
+    ch_versions = ch_versions.mix(CREATE_MASK.out.versions.first())
+
+    //
     // MODULE: Make pseudogenome from VCF
     //
+    ch_pseudo_vcf                         // tuple val(meta), path(vcf)
+        .join( CREATE_MASK.out.mask_bed ) // tuple val(meta), path(bed)
+        .set { ch_pseudogenome }          // tuple val(meta), path(vcf), path(bed)
+    
     VCF2PSEUDOGENOME (
-        VARIANTS_BCFTOOLS.out.filtered_vcf,
+        ch_pseudogenome,
         ch_reference
     )
     
@@ -313,7 +441,7 @@ workflow BOVISANALYZER {
     ch_versions = ch_versions.mix(SEQTK_COMP.out.versions.first())
 
     //
-    // MODULE: Calculate number of mapped positions in pseudogenome
+    // MODULE: Summarise seqtk outputs
     //
     SEQTK_PARSE (
         ch_seqtk_seqtkparse.collect{it[1]}.ifEmpty([])
@@ -325,11 +453,12 @@ workflow BOVISANALYZER {
     // MODULE: Collate all metadata
     //
     METADATA_COLLATE (
-            ch_kraken_metadata,
-            ch_tbprofiler_metadata,
-            ch_spoligo_metadata,
-            ch_seqtk_metadata
-        )
+        ch_kraken_metadata,
+        ch_tbprofiler_metadata,
+        ch_spoligo_metadata,
+        ch_cluster_metadata,
+        ch_seqtk_metadata
+    )
     ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
     
     //
@@ -355,19 +484,10 @@ workflow BOVISANALYZER {
         .set { aligned_pseudogenomes }
 
     //
-    // MODULE: Mask alignment
-    //
-    REMOVE_BLOCKS (
-        aligned_pseudogenomes,
-        ch_tab
-    )
-    ch_versions = ch_versions.mix(REMOVE_BLOCKS.out.versions.first())
-
-    //
     // MODULE: Extract SNPs from masked alignment
     //
     SNPSITES (
-        REMOVE_BLOCKS.out.fasta
+        aligned_pseudogenomes
     )
     ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
 
@@ -394,6 +514,8 @@ workflow BOVISANALYZER {
         FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
         ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
         ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
         ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()
