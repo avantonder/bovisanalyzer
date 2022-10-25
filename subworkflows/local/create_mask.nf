@@ -34,9 +34,12 @@ workflow CREATE_MASK {
     /*
      * MODULE Extract low quality regions
      */
+    BCFTOOLS_FILTER.out.vcf                  // tuple val(meta), path(vcf)
+        .join ( BEDTOOLS_GENOMECOV.out.bed ) // tuple val(meta), path(bed)
+        .set  { ch_vcf_bed }                 // tuple val(meta), path(vcf), path(bed)
+    
     BEDTOOLS_MERGE ( 
-        BCFTOOLS_FILTER.out.vcf, 
-        BEDTOOLS_GENOMECOV.out.bed, 
+        ch_vcf_bed, 
         mask
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
