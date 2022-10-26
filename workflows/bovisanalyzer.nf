@@ -329,6 +329,7 @@ workflow BOVISANALYZER {
     )
     ch_bam_mask                        = BAM_MARKDUPLICATES_PICARD.out.bam
     ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
+    ch_markduplicates_metrics_multiqc  = BAM_MARKDUPLICATES_PICARD.out.metrics
     ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
 
     //
@@ -464,33 +465,34 @@ workflow BOVISANALYZER {
     //
     // MODULE: Make pseudogenome alignment
     //
-    ALIGNPSEUDOGENOMES (
-        VCF2PSEUDOGENOME.out.pseudogenome.map { pseudogenome -> pseudogenome[1] }.collect(),
-        ch_reference
-    )
-    ALIGNPSEUDOGENOMES.out.aligned_pseudogenomes
-        .branch {
-            aligned_pseudogenomes ->
-            ALIGNMENT_NUM_PASS: aligned_pseudogenomes[0].toInteger() >= 4
-            ALIGNMENT_NUM_FAIL: aligned_pseudogenomes[0].toInteger() < 4
-        }
-        .set { aligned_pseudogenomes_branch }
+    if (!params.skip_alignment) {
+        ALIGNPSEUDOGENOMES (
+            VCF2PSEUDOGENOME.out.pseudogenome.map { pseudogenome -> pseudogenome[1] }.collect(),
+            ch_reference
+        )
+        ALIGNPSEUDOGENOMES.out.aligned_pseudogenomes
+            .branch {
+                aligned_pseudogenomes ->
+                ALIGNMENT_NUM_PASS: aligned_pseudogenomes[0].toInteger() >= 4
+                ALIGNMENT_NUM_FAIL: aligned_pseudogenomes[0].toInteger() < 4
+            }
+            .set { aligned_pseudogenomes_branch }
 
-    // Don't proceeed further if two few genonmes
-    aligned_pseudogenomes_branch.ALIGNMENT_NUM_FAIL.view { "Insufficient (${it[0]}) genomes after filtering to continue. Check results/pseudogenomes/low_quality_pseudogenomes.tsv for details"}
+        // Don't proceeed further if two few genonmes
+        aligned_pseudogenomes_branch.ALIGNMENT_NUM_FAIL.view { "Insufficient (${it[0]}) genomes after filtering to continue. Check results/pseudogenomes/low_quality_pseudogenomes.tsv for details"}
 
-    aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
-        .map{ it[1] }
-        .set { aligned_pseudogenomes }
+        aligned_pseudogenomes_branch.ALIGNMENT_NUM_PASS
+            .map{ it[1] }
+            .set { aligned_pseudogenomes }
 
-    //
-    // MODULE: Extract SNPs from masked alignment
-    //
-    SNPSITES (
-        aligned_pseudogenomes
-    )
-    ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
-
+        //
+        // MODULE: Extract SNPs from masked alignment
+        //
+        SNPSITES (
+            aligned_pseudogenomes
+        )
+        ch_versions = ch_versions.mix(SNPSITES.out.versions.first())
+    }
     //
     // MODULE: Collate software versions
     //
@@ -514,8 +516,8 @@ workflow BOVISANALYZER {
         FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
         ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
         ch_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_markduplicates_metrics_multiqc.collect{it[1]}.ifEmpty([]),
         ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-        ch_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
         ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([])
     )
     multiqc_report = MULTIQC.out.report.toList()

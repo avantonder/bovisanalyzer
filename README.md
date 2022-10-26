@@ -30,7 +30,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/))
     4. Call and filter variants ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
-    5. Convert filtered bcf to pseudogenome fasta ([`vcf2pseudogenome.py`](https://github.com/nf-core/bactmap/blob/dev/bin/vcf2pseudogenome.py))
+    5. Convert filtered vcf to pseudogenome fasta ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
     6. Mask each pseudogenome with zero-coverage, low coverage and poorly mapped regions ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
     7. Calculate the percentage of the reference mapped in each pseudogenome fasta ([`seqtk`](https://github.com/lh3/seqtk))
 12. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
