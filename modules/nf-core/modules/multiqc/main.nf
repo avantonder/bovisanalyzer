@@ -16,8 +16,8 @@ process MULTIQC {
     path ('fastp/*')
     path ('kraken2/*')
     path ('samtools/*')
-    path ('samtools/*')
     path ('picard_metrics/*')
+    path ('samtools/*')
     path ('variants/*')
 
     output:

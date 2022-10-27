@@ -38,7 +38,7 @@ module_order:
   - picard:
         name: 'METRICS: Picard (raw)'
         anchor: 'picard'
-        info: 'This section of the report shows Picard CollectMultipleMetrics after mapping with BWA.'
+        info: 'This section of the report shows the results of removing duplicate reads with Picard.'
         path_filters:
             - './picard_metrics/*'
   - samtools:

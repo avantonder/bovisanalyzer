@@ -1,21 +1,10 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process ALIGNPSEUDOGENOMES {
-    label 'process_low'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
+    label 'process_medium'
 
     conda (params.enable_conda ? "conda-forge::biopython=1.78" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/biopython:1.78"
-    } else {
-        container "quay.io/biocontainers/biopython:1.78"
-    }
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/biopython:1.78' :
+        'quay.io/biocontainers/biopython:1.78' }"
 
     input:
     path pseudogenomes
