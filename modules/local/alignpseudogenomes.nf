@@ -15,7 +15,6 @@ process ALIGNPSEUDOGENOMES {
     path "low_quality_pseudogenomes.tsv",                                emit: low_quality_metrics
 
     script: // This script is bundled with the pipeline, in nf-core/bactmap/bin/
-    def software = getSoftwareName(task.process)
     """
     touch low_quality_pseudogenomes.tsv
     touch aligned_pseudogenomes.fas
