@@ -25,12 +25,12 @@ workflow exits. If set in your user config file (`~/.nextflow/config`) then you 
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `skip_fastp` | Skip the fastp trimming step. | `string` | false |  |  |
-| `skip_fastqc` | Skip the fastQC step. | `string` | false |  |  |
+| `skip_fastp` | Skip the fastp trimming step. | `boolean` | false |  |  |
+| `skip_fastqc` | Skip the fastQC step. | `boolean` | false |  |  |
 | `save_trimmed_fail` | Save failed trimmed reads. | `string` | false |  |  |
-| `skip_multiqc` | Skip MultiQC. | `string` | false |  |  |
+| `skip_multiqc` | Skip MultiQC. | `boolean` | false |  |  |
 | `adapter_file` | Path to file containing adapters in FASTA format. | `string` | '${baseDir}/assets/adapters.fas' |  |  |
-| `skip_kraken2` | Skip Kraken 2 and Bracken. | `string` | false |  |  |
+| `skip_kraken2` | Skip Kraken 2 and Bracken. | `boolean` | false |  |  |
 
 ## Sub-sampling options
 
@@ -38,7 +38,7 @@ workflow exits. If set in your user config file (`~/.nextflow/config`) then you 
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `subsampling_off` | Skip sub-sampling with Rasusa. | `string` | false |  |  |
+| `subsampling_off` | Skip sub-sampling with Rasusa. | `boolean` | false |  |  |
 | `subsampling_depth_cutoff` | Desired coverage depth when sub-sampling. | `integer` | 100 |  |  |
 | `genome_size` | Genome size for sub-sampling (set to 4.3 Mb for M. bovis). | `string` | 4.3mb |  |  |
 
@@ -49,7 +49,7 @@ workflow exits. If set in your user config file (`~/.nextflow/config`) then you 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
 | `non_GATC_threshold` | Maximum non GATC bases (i.e - and N) to allow in pseudogenome sequences. | `number` | 0.25 |  |  |
-| `skip_alignment` | Skip alignment step. | `string` | false |  |  |
+| `skip_alignment` | Skip alignment step. | `boolean` | false |  |  |
 
 ## Institutional config options
 

@@ -13,8 +13,6 @@
             "required": [
                 "input",
                 "reference",
-                "kraken2db",
-                "brackendb",
                 "outdir"
             ],
             "properties": {
