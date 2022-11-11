@@ -1,16 +1,22 @@
 # avantonder/bovisanalyzer: Usage
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/bovisanalyzer/usage](https://nf-co.re/bovisanalyzer/usage)
-
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
-
 ## Introduction
-
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
 ## Samplesheet input
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. It has to be a comma-separated file with 3 columns, and a header row as shown in the example below. 
+
+An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/avantonder/bovisanalyzer/blob/main/bin/fastq_dir_to_samplesheet.py) has been provided to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
+
+     ```console
+     wget -L https://raw.githubusercontent.com/avantonder/bovisanalyzer/main/bin/fastq_dir_to_samplesheet.py
+
+     python fastq_dir_to_samplesheet.py <FASTQ_DIR> \
+        samplesheet.csv \
+        -r1 <FWD_FASTQ_SUFFIX> \
+        -r2 <REV_FASTQ_SUFFIX>
+
+Use the `--input` parameter to specify the location of `samplesheet.csv`. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```console
 --input '[path to samplesheet file]'
@@ -19,17 +25,12 @@ You will need to create a samplesheet with information about the samples you wou
 
 The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 2 samples, one paired-end and one single-end.
 
 ```console
 sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
 ```
 
 | Column    | Description                                                                                                                                                                            |
@@ -40,12 +41,39 @@ TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
+## Reference genome
+
+A reference genome needs to be provided to the pipeline.  The pipeline has been designed to work with the AF2122/97 reference and it's **strongly recommended** that you use this this sequence.  The main output that'll be affected is the masking of low quality regions and the APHA cluster assignment which are based on coordinates extracted from the AF2122/97 reference.  A copy of the [reference file](../assets/Mycobacterium_bovis_AF2122_97_GCF_000195835_4.fa) has been provided with the pipeline.  Use the `--reference` parameter to specify the location of the reference file:
+
+```console
+--reference '[path to reference file]'
+```
+
+## Kraken 2 database
+
+The pipeline can be provided with a path to a Kraken 2 database which is used, along with Bracken, to assign sequence reads to a particular taxon.  Use the `--kraken2db` and `--brackendb` parameters to specify the location of the Kraken 2 database:
+
+```console
+--kraken2db '[path to Kraken 2 database]'
+--brackendb '[path to Kraken 2 database]'
+```
+
+The Kraken 2 and Bracken steps can by skipped by specifying the `--skip_kraken2` parameter.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run avantonder/bovisanalyzer --input samplesheet.csv --reference Mycobacterium_bovis_AF2122_97_GCF_000195835_2.fa -profile singularity --kraken2db minikraken2_v1_8GB --brackendb minikraken2_v1_8GB
+nextflow run avantonder/bovisanalyzer \
+  -c cluster.config \
+  --input samplesheet.csv \
+  --reference Mycobacterium_bovis_AF2122_97_GCF_000195835_4.fa \
+  -profile singularity \
+  --kraken2db minikraken2_v1_8GB \
+  --brackendb minikraken2_v1_8GB \
+  --outdir <OUTDIR> \
+  -resume
 ```
 
 This will launch the pipeline with the `singularity` configuration profile. See below for more information about profiles.
@@ -53,9 +81,9 @@ This will launch the pipeline with the `singularity` configuration profile. See 
 Note that the pipeline will create the following files in your working directory:
 
 ```console
-work                # Directory containing the nextflow working files
-results             # Directory containing the finished results files
-.nextflow_log       # Log file from Nextflow
+work                   # Directory containing the nextflow working files
+<OUTDIR> # Directory containing the finished results files
+.nextflow_log          # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 

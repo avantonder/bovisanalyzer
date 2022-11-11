@@ -16,16 +16,17 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 ## Pipeline summary
 
 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Calculate fastq summary statistics ([`fastq-scan`](https://github.com/rpetit3/fastq-scan))
+2. Calculate summary statistics for raw fastq files ([`fastq-scan`](https://github.com/rpetit3/fastq-scan))
 3. Index reference fasta file ([`BWA index`](https://github.com/lh3/bwa))
 4. Trim reads for quality and adapter sequence ([`fastp`](https://github.com/OpenGene/fastp))
-5. Assign taxonomic labels to sequence reads ([`Kraken 2`](https://ccb.jhu.edu/software/kraken2/))
-6. Re-estimate taxonomic abundance of samples analyzed by kraken ([`Bracken`](https://ccb.jhu.edu/software/bracken/))
-7. Downsample fastq files ([`Rasusa`](https://github.com/mbhall88/rasusa))
-8. Detect drug resistance and lineage ([`TB-Profiler`](https://github.com/jodyphelan/TBProfiler))
-9. Detect spoligotype ([`SpoTyping`](https://github.com/xiaeryu/SpoTyping-v2.0))
-10. Assign GB WGS clade ([`APHA-CSU`](https://github.com/APHA-CSU/btb-seq))
-11. Variant calling
+5. Calculate summary statistics for trimmed fastq files ([`fastq-scan`](https://github.com/rpetit3/fastq-scan))
+6. Assign taxonomic labels to sequence reads ([`Kraken 2`](https://ccb.jhu.edu/software/kraken2/))
+7. Re-estimate taxonomic abundance of samples analyzed by kraken ([`Bracken`](https://ccb.jhu.edu/software/bracken/))
+8. Downsample fastq files ([`Rasusa`](https://github.com/mbhall88/rasusa))
+9. Detect drug resistance and lineage ([`TB-Profiler`](https://github.com/jodyphelan/TBProfiler))
+10. Detect spoligotype ([`SpoTyping`](https://github.com/xiaeryu/SpoTyping-v2.0))
+11. Assign GB WGS clade ([`APHA-CSU`](https://github.com/APHA-CSU/btb-seq))
+12. Variant calling
     1. Read mapping ([`BWA mem`](https://github.com/lh3/bwa))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/))
@@ -33,10 +34,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     5. Convert filtered vcf to pseudogenome fasta ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
     6. Mask each pseudogenome with zero-coverage, low coverage and poorly mapped regions ([`BCFtools`](http://samtools.github.io/bcftools/bcftools.html))
     7. Calculate the percentage of the reference mapped in each pseudogenome fasta ([`seqtk`](https://github.com/lh3/seqtk))
-12. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
-13. Extract variant sites from alignment ([`SNP-sites`](https://github.com/sanger-pathogens/snp-sites))
-14. Summarise fastq metrics, species composition, genotyping and mapping statistics
-15. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
+13. Create alignment from pseudogenome by concatenating fasta files having first checked that the sample sequences are high quality([`calculate_fraction_of_non_GATC_bases.py`](https://github.com/nf-core/bactmap/blob/dev/bin/))
+14. Extract variant sites from alignment ([`SNP-sites`](https://github.com/sanger-pathogens/snp-sites))
+15. Summarise fastq metrics, species composition, genotyping and mapping statistics
+16. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
 
@@ -52,28 +53,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
    tar xvfz minikraken2_v1_8GB_201904.tgz
    ```
 
-4. An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/avantonder/bovisanalyzer/blob/main/bin/fastq_dir_to_samplesheet.py) has been provided and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
-
-     ```console
-     wget -L https://raw.githubusercontent.com/avantonder/bovisanalyzer/main/bin/fastq_dir_to_samplesheet.py
-     ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv -r1 <FWD_FASTQ_SUFFIX> -r2 <REV_FASTQ_SUFFIX>
-
-Alternatively the samplesheet.csv file created by nf-core/fetchngs can also be used.
-
-5. Start running your own analysis!
-
-   - Typical command
+4. Download the pipeline and test it on a minimal dataset with a single command:
 
    ```bash
-    nextflow run avantonder/bovisanalyzer \
-        -profile <docker/singularity/podman/conda/institute> \
-        --input samplesheet.csv \
-        --reference <REFERENCE FASTA>
-        --kraken2db minikraken2_v1_8GB \
-        --brackendb minikraken2_v1_8GB \
-        --outdir <OUTDIR>
-    ```
-
+   nextflow run avantonder/bovisanalyzer -profile test,YOURPROFILE --outdir <OUTDIR>
+   ```
    Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
 
    > - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile test,docker`.
@@ -81,9 +65,35 @@ Alternatively the samplesheet.csv file created by nf-core/fetchngs can also be u
    > - If you are using `singularity`, please use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
    > - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
 
+5. An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/avantonder/bovisanalyzer/blob/main/bin/fastq_dir_to_samplesheet.py) has been provided to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
+
+     ```console
+     wget -L https://raw.githubusercontent.com/avantonder/bovisanalyzer/main/bin/fastq_dir_to_samplesheet.py
+
+     python fastq_dir_to_samplesheet.py <FASTQ_DIR> \
+        samplesheet.csv \
+        -r1 <FWD_FASTQ_SUFFIX> \
+        -r2 <REV_FASTQ_SUFFIX>
+
+Alternatively the samplesheet.csv file created by [`nf-core/fetchngs`](https://nf-co.re/fetchngs) can also be used.
+
+6. The pipeline has been designed to work with the AF2122/97 reference and it's **strongly recommended** that you use this this sequence. A copy of the [reference file](assets/Mycobacterium_bovis_AF2122_97_GCF_000195835_4.fa) has been provided with the pipeline. Start running your own analysis:
+
+   - Typical command
+
+   ```bash
+    nextflow run avantonder/bovisanalyzer \
+        -profile <docker/singularity/podman/conda/institute> \
+        --input samplesheet.csv \
+        --reference <REFERENCE FASTA> \
+        --kraken2db minikraken2_v1_8GB \
+        --brackendb minikraken2_v1_8GB \
+        --outdir <OUTDIR>
+    ```
+
 ## Documentation
 
-The avantonder/bovisanalyzer pipeline comes with documentation about the pipeline [usage](https://nf-co.re/bovisanalyzer/usage), [parameters](https://nf-co.re/bovisanalyzer/parameters) and [output](https://nf-co.re/bovisanalyzer/output).
+The avantonder/bovisanalyzer pipeline comes with documentation about the pipeline [usage](docs/usage.md), [parameters](docs/parameters.md) and [output](docs/output.md).
 
 ## Acknowledgements
 
@@ -97,12 +107,6 @@ If you have any issues, questions or suggestions for improving bovisanalyzer, pl
 
 ## Citations
 
+If you use the avantonder/bovisanalyzer pipeline, please cite it using the following doi: ZENODO_DOI
+
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
-
-You can cite the `nf-core` publication as follows:
-
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
