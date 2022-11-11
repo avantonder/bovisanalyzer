@@ -67,12 +67,12 @@
             "default": "",
             "properties": {
                 "skip_fastp": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip the fastp trimming step."
                 },
                 "skip_fastqc": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip the fastQC step."
                 },
@@ -82,7 +82,7 @@
                     "description": "Save failed trimmed reads."
                 },
                 "skip_multiqc": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip MultiQC."
                 },
@@ -92,7 +92,7 @@
                     "description": "Path to file containing adapters in FASTA format."
                 },
                 "skip_kraken2": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip Kraken 2 and Bracken."
                 }
@@ -105,7 +105,7 @@
             "default": "",
             "properties": {
                 "subsampling_off": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip sub-sampling with Rasusa."
                 },
@@ -133,7 +133,7 @@
                     "description": "Maximum non GATC bases (i.e - and N) to allow in pseudogenome sequences."
                 },
                 "skip_alignment": {
-                    "type": "string",
+                    "type": "boolean",
                     "default": "false",
                     "description": "Skip alignment step."
                 }
