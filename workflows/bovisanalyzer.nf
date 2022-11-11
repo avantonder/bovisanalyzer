@@ -225,7 +225,6 @@ workflow BOVISANALYZER {
         ch_kraken2_krakenparse   = KRAKEN2_KRAKEN2.out.txt
         ch_kraken2_multiqc       = KRAKEN2_KRAKEN2.out.txt
         ch_versions              = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
-    }
     
     //
     // MODULE: Run bracken
@@ -236,6 +235,7 @@ workflow BOVISANALYZER {
     )
     ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
     ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
+    }
 
     //
     // MODULE: Run krakenparse
