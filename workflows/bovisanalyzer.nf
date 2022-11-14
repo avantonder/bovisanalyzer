@@ -384,7 +384,7 @@ workflow BOVISANALYZER {
     //
     // MODULE: Define APHA cluster
     //
-    ch_readstats_cluster = Channel.empty()
+    //ch_readstats_cluster = Channel.empty()
     if (!params.skip_clusters) {
         ch_readstats_cluster                           // tuple val(meta), path(csv)
             .join( VARIANTS_BCFTOOLS.out.discrim_vcf ) // tuple val(meta), path(vcf)
