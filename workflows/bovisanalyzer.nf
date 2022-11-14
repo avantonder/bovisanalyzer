@@ -226,35 +226,37 @@ workflow BOVISANALYZER {
         ch_kraken2_multiqc       = KRAKEN2_KRAKEN2.out.txt
         ch_versions              = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
     
-    //
-    // MODULE: Run bracken
-    //
-    BRACKEN_BRACKEN (
-        ch_kraken2_bracken,
-        ch_brackendb
-    )
-    ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
-    ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
-    }
+        //
+        // MODULE: Run bracken
+        //
+        BRACKEN_BRACKEN (
+            ch_kraken2_bracken,
+            ch_brackendb
+        )
+        ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
+        ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
 
-    //
-    // MODULE: Run krakenparse
-    //
-    KRAKENPARSE (
-        ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
-        ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
-    )
-    ch_kraken_metadata = KRAKENPARSE.out.composition
-    ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
+        //
+        // MODULE: Run krakenparse
+        //
+        KRAKENPARSE (
+            ch_kraken2_krakenparse.collect{it[1]}.ifEmpty([]),
+            ch_bracken_krakenparse.collect{it[1]}.ifEmpty([])
+        )
+        ch_kraken_metadata = KRAKENPARSE.out.composition
+        ch_versions = ch_versions.mix(KRAKENPARSE.out.versions.first())
+    }
 
     //
     // MODULE: Subsample reads
     //
-    SUB_SAMPLING(
-        ch_variants_fastq
-    )
-    ch_variants_fastq = SUB_SAMPLING.out.reads
-    ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
+    if (!params.subsampling_off) {
+        SUB_SAMPLING(
+            ch_variants_fastq
+        )
+        ch_variants_fastq = SUB_SAMPLING.out.reads
+        ch_versions = ch_versions.mix(SUB_SAMPLING.out.versions.first())
+    }
 
     //
     // MODULE: TBprofiler
@@ -382,30 +384,33 @@ workflow BOVISANALYZER {
     //
     // MODULE: Define APHA cluster
     //
-    ch_readstats_cluster                           // tuple val(meta), path(csv)
-        .join( VARIANTS_BCFTOOLS.out.discrim_vcf ) // tuple val(meta), path(vcf)
-        .set { ch_apha_cluster }                   // tuple val(meta), path(csv), path(vcf)
+    ch_readstats_cluster = Channel.empty()
+    if (!params.skip_clusters) {
+        ch_readstats_cluster                           // tuple val(meta), path(csv)
+            .join( VARIANTS_BCFTOOLS.out.discrim_vcf ) // tuple val(meta), path(vcf)
+            .set { ch_apha_cluster }                   // tuple val(meta), path(csv), path(vcf)
 
-    DEFINE_APHA_CLUSTER (
-        ch_apha_cluster,
-        ch_patternsDetailsFile,
-        ch_patternsBritishBTBFile,
-        ch_patternsPinnipediiFile,
-        ch_patternsMic_PinFile,
-        ch_patternsMicrotiFile,
-        ch_patternsBTBFile
-    )
-    ch_cluster_clusterparse = DEFINE_APHA_CLUSTER.out.csv
-    ch_versions             = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
-    
-    //
-    // MODULE: Summarise APHA cluster outputs
-    //
-    CLUSTER_PARSE (
-        ch_cluster_clusterparse.collect{it[1]}.ifEmpty([])
-    )
-    ch_cluster_metadata = CLUSTER_PARSE.out.tsv
-    ch_versions         = ch_versions.mix(CLUSTER_PARSE.out.versions.first())
+        DEFINE_APHA_CLUSTER (
+            ch_apha_cluster,
+            ch_patternsDetailsFile,
+            ch_patternsBritishBTBFile,
+            ch_patternsPinnipediiFile,
+            ch_patternsMic_PinFile,
+            ch_patternsMicrotiFile,
+            ch_patternsBTBFile
+        )
+        ch_cluster_clusterparse = DEFINE_APHA_CLUSTER.out.csv
+        ch_versions             = ch_versions.mix(DEFINE_APHA_CLUSTER.out.versions.first())
+        
+        //
+        // MODULE: Summarise APHA cluster outputs
+        //
+        CLUSTER_PARSE (
+            ch_cluster_clusterparse.collect{it[1]}.ifEmpty([])
+        )
+        ch_cluster_metadata = CLUSTER_PARSE.out.tsv
+        ch_versions         = ch_versions.mix(CLUSTER_PARSE.out.versions.first())
+    }
     
     //
     // SUBWORKFLOW: Create mask bed file
@@ -453,14 +458,36 @@ workflow BOVISANALYZER {
     //
     // MODULE: Collate all metadata
     //
-    METADATA_COLLATE (
-        ch_kraken_metadata,
-        ch_tbprofiler_metadata,
-        ch_spoligo_metadata,
-        ch_cluster_metadata,
-        ch_seqtk_metadata
-    )
-    ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+    if (!params.skip_kraken2 && !params.skip_clusters) { 
+        METADATA_COLLATE (
+            ch_kraken_metadata,
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata,
+            ch_cluster_metadata,
+            ch_seqtk_metadata
+        )
+        ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+      } 
+    else if (!params.skip_clusters && params.skip_kraken2) {
+        METADATA_COLLATE (
+            [],
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata,
+            ch_cluster_metadata,
+            ch_seqtk_metadata
+        )
+        ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+    }  
+    else if (params.skip_clusters && !params.skip_kraken2) {
+        METADATA_COLLATE (
+            ch_kraken_metadata,
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata,
+            [],
+            ch_seqtk_metadata
+        )
+        ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+      }
     
     //
     // MODULE: Make pseudogenome alignment
