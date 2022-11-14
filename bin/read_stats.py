@@ -40,7 +40,7 @@ def json_to_dataframe(json_files):
     """
     json_names = [i.replace('.json', '') for i in json_files]
     json_names_df = pd.DataFrame(json_names)
-    json_names_df.columns = ['sample']
+    json_names_df.columns = ['Sample']
     jsons_data = {}
 
     for index, file in enumerate(json_files):
