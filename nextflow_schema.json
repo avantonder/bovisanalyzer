@@ -28,15 +28,15 @@
                 },
                 "reference": {
                     "type": "string",
-                    "default": null
+                    "default": "None"
                 },
                 "kraken2db": {
                     "type": "string",
-                    "default": null
+                    "default": "None"
                 },
                 "brackendb": {
                     "type": "string",
-                    "default": null
+                    "default": "None"
                 },
                 "outdir": {
                     "type": "string",
@@ -66,22 +66,18 @@
             "properties": {
                 "skip_fastp": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip the fastp trimming step."
                 },
                 "skip_fastqc": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip the fastQC step."
                 },
                 "save_trimmed_fail": {
-                    "type": "string",
-                    "default": "false",
+                    "type": "boolean",
                     "description": "Save failed trimmed reads."
                 },
                 "skip_multiqc": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip MultiQC."
                 },
                 "adapter_file": {
@@ -91,7 +87,6 @@
                 },
                 "skip_kraken2": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip Kraken 2 and Bracken."
                 }
             }
@@ -104,7 +99,6 @@
             "properties": {
                 "subsampling_off": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip sub-sampling with Rasusa."
                 },
                 "subsampling_depth_cutoff": {
@@ -116,6 +110,18 @@
                     "type": "string",
                     "default": "4.3mb",
                     "description": "Genome size for sub-sampling (set to 4.3 Mb for M. bovis)."
+                }
+            }
+        },
+        "clustering_options": {
+            "title": "Clustering options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "properties": {
+                "skip_clusters": {
+                    "type": "boolean",
+                    "description": "Skip APHA clustering"
                 }
             }
         },
@@ -132,7 +138,6 @@
                 },
                 "skip_alignment": {
                     "type": "boolean",
-                    "default": "false",
                     "description": "Skip alignment step."
                 }
             }
@@ -322,6 +327,9 @@
         },
         {
             "$ref": "#/definitions/sub_sampling_options"
+        },
+        {
+            "$ref": "#/definitions/clustering_options"
         },
         {
             "$ref": "#/definitions/alignment_options"
