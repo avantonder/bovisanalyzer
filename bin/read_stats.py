@@ -121,10 +121,12 @@ def main(args=None):
     ## Create dataframe of raw reads fastq-scan results
     raw_json_df = json_to_dataframe(raw_json_files)
     raw_json_df = raw_json_df.rename(columns = {'read_total' : 'NumRawReads'})
+    raw_json_df['Sample'] = raw_json_df['Sample'].str.replace('.raw','')
 
     ## Create dataframe of trimmed reads fastq-scan results
     trim_json_df = json_to_dataframe(trim_json_files)
     trim_json_df = trim_json_df.rename(columns = {'read_total' : 'NumTrimReads'})
+    trim_json_df['Sample'] = trim_json_df['Sample'].str.replace('.trim','')
 
     ## Merge fastq-scan dataframes
     fastqscan_merged = pd.merge(raw_json_df, trim_json_df, on = ['Sample'])
