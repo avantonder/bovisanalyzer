@@ -487,7 +487,17 @@ workflow BOVISANALYZER {
             ch_seqtk_metadata
         )
         ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
-      }
+    } 
+    else if (params.skip_clusters && params.skip_kraken2) {
+        METADATA_COLLATE (
+            [],
+            ch_tbprofiler_metadata,
+            ch_spoligo_metadata,
+            [],
+            ch_seqtk_metadata
+        )
+        ch_versions = ch_versions.mix(METADATA_COLLATE.out.versions.first())
+    }
     
     //
     // MODULE: Make pseudogenome alignment
