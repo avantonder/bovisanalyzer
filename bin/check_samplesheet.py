@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 """Provide a command line tool to validate and transform tabular samplesheets."""
