@@ -31,7 +31,7 @@ def seqtk_to_dataframe(file_list):
     """ 
     Function for creating a dataframe from a list of seqtk comp files
     """
-    seqtk_file_list = [pd.read_csv(f, sep='\t', header=None) for f in seqtk_files]
+    seqtk_file_list = [pd.read_csv(f, sep='\t', header=None) for f in file_list]
     seqtk_df = pd.concat(seqtk_file_list, ignore_index=True)
     seqtk_df = seqtk_df.iloc[:, 0:6]
     seqtk_df.columns = ['sample', 'ref_length', '#A', '#C', '#G', '#T']
