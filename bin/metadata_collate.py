@@ -117,6 +117,8 @@ def main(args=None):
         metadata_list = [spoligo_summary_df, tbprofiler_summary_df, bracken_summary_df, seqtk_summary_df]
     elif args.cluster_summary is not None:
         metadata_list = [spoligo_summary_df, tbprofiler_summary_df, seqtk_summary_df, cluster_summary_df]
+    else:
+        metadata_list = [spoligo_summary_df, tbprofiler_summary_df, seqtk_summary_df]
       
     ## Merge metadata dataframes
     merged_table = metadata_merge(metadata_list, 'sample')
@@ -129,6 +131,8 @@ def main(args=None):
         columns_to_keep = ['sample', 'Mycobacterium tuberculosis', 'main_lineage', 'sub_lineage', 'SB number', '%ref mapped']
     elif args.cluster_summary is not None:
         columns_to_keep = ['sample', 'main_lineage', 'sub_lineage', 'flag', 'group', 'SB number', 'MeanDepth', 'pcMapped', '%ref mapped', 'Outcome']
+    else:
+        columns_to_keep = ['sample', 'main_lineage', 'sub_lineage', 'SB number', '%ref mapped']
     
     ## Re-order columns in merged metadata dataframe
     merged_table = merged_table[columns_to_keep]
