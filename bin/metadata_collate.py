@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-import os, argparse, sys, subprocess
+import os
+import argparse 
+import sys
 import pandas as pd
 from functools import reduce
 
