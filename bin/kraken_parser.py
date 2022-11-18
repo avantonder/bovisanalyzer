@@ -72,10 +72,10 @@ def main(args=None):
     make_dir(out_dir)
 
     ## Create list of Kraken 2 report files
-	kraken_report_files = sorted(glob.glob('*.kraken2.report.txt'))
+    kraken_report_files = sorted(glob.glob('*.kraken2.report.txt'))
 
     ## Create list of Bracken species abundance files
-	species_abundance_files = sorted(glob.glob('*.tsv'))
+    species_abundance_files = sorted(glob.glob('*.tsv'))
 	
 	## Create combined Kraken 2 and Bracken dataframe
     combined_df = files_to_dataframe(kraken_report_files,species_abundance_files)
