@@ -216,7 +216,12 @@ workflow BOVISANALYZER {
     // MODULE: Run kraken2
     //  
     ch_kraken2_multiqc = Channel.empty()
+    ch_kraken2db       = Channel.empty()
+    ch_brackendb       = Channel.empty()
     if (!params.skip_kraken2) {
+        ch_kraken2db = file(params.kraken2db)
+        ch_brackendb = file(params.brackendb)
+        
         KRAKEN2_KRAKEN2 (
                 ch_variants_fastq,
                 ch_kraken2db
