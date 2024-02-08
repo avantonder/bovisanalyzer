@@ -13,9 +13,9 @@ def parser_args(args=None):
     Description = 'Collect SpoTyping outputs, match against spoligotype database and create a summary table'
     Epilog = """Example usage: python spoligo_parser.py """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument("-tb", "tbprofiler_summary", type=str, default="tbprofiler.txt"         , help="TB-profiler summary file (default: 'tbprofiler.txt').")
-    parser.add_argument("-sb", "--spol_db"         , type=str, default="spoligotype_db.tsv"     , help="Spoligotype database file (default: 'spoligotype_db.tsv').")
-    parser.add_argument("-of", "--output_file"     , type=str, default="spoligotype_summary.tsv", help="Spoligotype summary file (default: 'spoligotype_summary.tsv').")
+    parser.add_argument("-tb", "--tbprofiler_summary", type=str, default="tbprofiler.txt"         , help="TB-profiler summary file (default: 'tbprofiler.txt').")
+    parser.add_argument("-sb", "--spol_db"           , type=str, default="spoligotype_db.tsv"     , help="Spoligotype database file (default: 'spoligotype_db.tsv').")
+    parser.add_argument("-of", "--output_file"       , type=str, default="spoligotype_summary.tsv", help="Spoligotype summary file (default: 'spoligotype_summary.tsv').")
     return parser.parse_args(args)
 
 def make_dir(path):
