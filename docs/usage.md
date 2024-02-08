@@ -51,11 +51,10 @@ A reference genome needs to be provided to the pipeline.  The pipeline has been 
 
 ## Kraken 2 database
 
-The pipeline can be provided with a path to a Kraken 2 database which is used, along with Bracken, to assign sequence reads to a particular taxon.  Use the `--kraken2db` and `--brackendb` parameters to specify the location of the Kraken 2 database:
+The pipeline can be provided with a path to a Kraken 2 database which is used, along with Bracken, to assign sequence reads to a particular taxon.  Use the `--kraken2db` parameter to specify the location of the Kraken 2 database:
 
 ```console
 --kraken2db '[path to Kraken 2 database]'
---brackendb '[path to Kraken 2 database]'
 ```
 
 The Kraken 2 and Bracken steps can by skipped by specifying the `--skip_kraken2` parameter.
@@ -71,7 +70,6 @@ nextflow run avantonder/bovisanalyzer \
   --reference Mycobacterium_bovis_AF2122_97_GCF_000195835_4.fa \
   -profile singularity \
   --kraken2db minikraken2_v1_8GB \
-  --brackendb minikraken2_v1_8GB \
   --outdir <OUTDIR> \
   -resume
 ```

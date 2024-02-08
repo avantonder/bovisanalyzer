@@ -15,7 +15,7 @@ process SPOLIGOPARSE {
     path  "versions.yml"          , emit: versions
     
     script: // This script is bundled with the pipeline in avantonder/bovisanalyzer/bin/
-    def parser_version = '1.0'
+    def parser_version = '2.0'
     """
     spoligo_parser.py
     cat <<-END_VERSIONS > versions.yml

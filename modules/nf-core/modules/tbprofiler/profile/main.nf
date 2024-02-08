@@ -2,22 +2,13 @@ process TBPROFILER_PROFILE {
     tag "$meta.id"
     label 'process_high'
     label 'error_retry'
-
-    // DO NOT CHANGE VERSION!!
     
-    conda (params.enable_conda ? "bioconda::tb-profiler=4.1.1" : null)
+    conda "bioconda::tb-profiler=5.0.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/tb-profiler:4.1.1--pypyh5e36f6f_1' :
-        'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
-
+        'https://depot.galaxyproject.org/singularity/tb-profiler:5.0.1--pyhdfd78af_1' :
+        'quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1' }"
+    
     input:
-    path tbdb_barcode
-    path tbdb_bed
-    path tbdb_drjson
-    path tbdb_fasta
-    path tbdb_gff
-    path tbdb_varjson
-    path tbdb_verjson
     tuple val(meta), path(reads)
 
     output:
@@ -39,17 +30,13 @@ process TBPROFILER_PROFILE {
     tb-profiler \\
         profile \\
         $args \\
-        --csv \\
-        --txt \\
-        --no_trim \\
         --prefix ${prefix} \\
         --threads $task.cpus \\
-        --external_db ./tbdbnew \\
         $input_reads
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        tbprofiler:  \$( echo \$(tb-profiler --version 2>&1) | sed 's/TBProfiler version //')
+        tbprofiler:  \$( echo \$(tb-profiler --version 2>&1) | sed 's/tb-profiler version //')
     END_VERSIONS
     """
 }

@@ -139,7 +139,7 @@ def main(args=None):
     fastqscan_mapped_read_df = pd.merge(fastqscan_merged, mapped_read_merged_df, on = ['Sample'])
 
     ## Calculate % of reads that mapped
-    fastqscan_mapped_read_df['%Mapped'] = fastqscan_mapped_read_df['NumMappedReads'].astype(int) / fastqscan_mapped_read_df['NumTrimReads'].astype(int) * 100
+    fastqscan_mapped_read_df['%TrimMapped'] = fastqscan_mapped_read_df['NumMappedReads'].astype(int) / fastqscan_mapped_read_df['NumTrimReads'].astype(int) * 100
 
     ## Create dataframe of samtools depth results
     coverage_df = depth_to_dataframe(depth_files, args.ref_length)
@@ -155,8 +155,8 @@ def main(args=None):
     ## Set logic for applying flags based on values provided
     conditions = [
         (merged_df['%afterTrim'] < args.min_aft_trim),
-        (merged_df['MeanDepth'] >= args.min_depth) & (merged_df['%Mapped'] > args.min_pc),
-        (merged_df['MeanDepth'] < args.min_depth) & (merged_df['%Mapped'] < args.min_pc) & (merged_df['NumTrimReads'] > args.min_reads),
+        (merged_df['MeanDepth'] >= args.min_depth) & (merged_df['%TrimMapped'] > args.min_pc),
+        (merged_df['MeanDepth'] < args.min_depth) & (merged_df['%TrimMapped'] < args.min_pc) & (merged_df['NumTrimReads'] > args.min_reads),
         (merged_df['MeanDepth'] < args.min_depth) & (merged_df['NumTrimReads'] < args.min_reads)
     ]
 
