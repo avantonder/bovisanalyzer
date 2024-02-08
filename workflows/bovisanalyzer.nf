@@ -24,13 +24,6 @@ if (params.reference) { ch_reference = file(params.reference) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_tbdb_barcode           = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",                           checkIfExists: true)
-ch_tbdb_bed               = file("$projectDir/assets/tbdb/tbdbnew.bed",                                   checkIfExists: true)
-ch_tbdb_drjson            = file("$projectDir/assets/tbdb/tbdbnew.dr.json",                               checkIfExists: true)
-ch_tbdb_fasta             = file("$projectDir/assets/tbdb/tbdbnew.fasta",                                 checkIfExists: true)
-ch_tbdb_gff               = file("$projectDir/assets/tbdb/tbdbnew.gff",                                   checkIfExists: true)
-ch_tbdb_varjson           = file("$projectDir/assets/tbdb/tbdbnew.variables.json",                        checkIfExists: true)
-ch_tbdb_verjson           = file("$projectDir/assets/tbdb/tbdbnew.version.json",                          checkIfExists: true)
 ch_spoligotype_db         = file("$projectDir/assets/spoligotype_db.tsv",                                 checkIfExists: true)
 ch_discrimpos             = file("$projectDir/assets/DiscrimPos.tsv",                                     checkIfExists: true)
 ch_patternsDetailsFile    = file("$projectDir/assets/Stage1_patterns/CSSnewclusters_LT708304_230119.csv", checkIfExists: true)
@@ -56,7 +49,6 @@ include { FASTQSCANPARSE as FASTQSCANPARSE_RAW  } from '../modules/local/fastqsc
 include { FASTQSCANPARSE as FASTQSCANPARSE_TRIM } from '../modules/local/fastqscanparse'
 include { KRAKENPARSE                           } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofiler_collate'
-include { SPOTYPING                             } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
 include { READ_STATS                            } from '../modules/local/read_stats'
 include { READSTATS_PARSE                       } from '../modules/local/readstats_parse'
