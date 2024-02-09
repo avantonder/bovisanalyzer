@@ -1,10 +1,10 @@
 process TBPROFILER_COLLATE {
     label 'process_low'
 
-    conda (params.enable_conda ? "bioconda::tb-profiler=4.1.1" : null)
+    conda "bioconda::tb-profiler=5.0.1"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/tb-profiler:4.1.1--pypyh5e36f6f_1' :
-        'quay.io/biocontainers/tb-profiler:4.1.1--pypyh5e36f6f_1' }"
+        'https://depot.galaxyproject.org/singularity/tb-profiler:5.0.1--pyhdfd78af_1' :
+        'quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1' }"
 
     input:
 

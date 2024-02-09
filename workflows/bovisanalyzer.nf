@@ -11,14 +11,12 @@ WorkflowBovisanalyzer.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.reference,  params.kraken2db, params.brackendb]
+def checkPathParamList = [ params.input, params.multiqc_config, params.reference,  params.kraken2db]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 if (params.reference) { ch_reference = file(params.reference) } else { exit 1, 'Reference fasta file not specified!' }
-//if (params.kraken2db) { ch_kraken2db = file(params.kraken2db) } else { exit 1, 'kraken2 database not specified!' }
-//if (params.brackendb) { ch_brackendb = file(params.brackendb) } else { exit 1, 'bracken database not specified!' }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,13 +24,6 @@ if (params.reference) { ch_reference = file(params.reference) } else { exit 1, '
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_tbdb_barcode           = file("$projectDir/assets/tbdb/tbdbnew.barcode.bed",                           checkIfExists: true)
-ch_tbdb_bed               = file("$projectDir/assets/tbdb/tbdbnew.bed",                                   checkIfExists: true)
-ch_tbdb_drjson            = file("$projectDir/assets/tbdb/tbdbnew.dr.json",                               checkIfExists: true)
-ch_tbdb_fasta             = file("$projectDir/assets/tbdb/tbdbnew.fasta",                                 checkIfExists: true)
-ch_tbdb_gff               = file("$projectDir/assets/tbdb/tbdbnew.gff",                                   checkIfExists: true)
-ch_tbdb_varjson           = file("$projectDir/assets/tbdb/tbdbnew.variables.json",                        checkIfExists: true)
-ch_tbdb_verjson           = file("$projectDir/assets/tbdb/tbdbnew.version.json",                          checkIfExists: true)
 ch_spoligotype_db         = file("$projectDir/assets/spoligotype_db.tsv",                                 checkIfExists: true)
 ch_discrimpos             = file("$projectDir/assets/DiscrimPos.tsv",                                     checkIfExists: true)
 ch_patternsDetailsFile    = file("$projectDir/assets/Stage1_patterns/CSSnewclusters_LT708304_230119.csv", checkIfExists: true)
@@ -58,7 +49,6 @@ include { FASTQSCANPARSE as FASTQSCANPARSE_RAW  } from '../modules/local/fastqsc
 include { FASTQSCANPARSE as FASTQSCANPARSE_TRIM } from '../modules/local/fastqscanparse'
 include { KRAKENPARSE                           } from '../modules/local/krakenparse'
 include { TBPROFILER_COLLATE                    } from '../modules/local/tbprofiler_collate'
-include { SPOTYPING                             } from '../modules/local/spotyping'
 include { SPOLIGOPARSE                          } from '../modules/local/spoligoparse'
 include { READ_STATS                            } from '../modules/local/read_stats'
 include { READSTATS_PARSE                       } from '../modules/local/readstats_parse'
@@ -217,10 +207,8 @@ workflow BOVISANALYZER {
     //  
     ch_kraken2_multiqc = Channel.empty()
     ch_kraken2db       = Channel.empty()
-    ch_brackendb       = Channel.empty()
     if (!params.skip_kraken2) {
         ch_kraken2db = file(params.kraken2db)
-        ch_brackendb = file(params.brackendb)
         
         KRAKEN2_KRAKEN2 (
                 ch_variants_fastq,
@@ -236,7 +224,7 @@ workflow BOVISANALYZER {
         //
         BRACKEN_BRACKEN (
             ch_kraken2_bracken,
-            ch_brackendb
+            ch_kraken2db
         )
         ch_bracken_krakenparse = BRACKEN_BRACKEN.out.reports
         ch_versions            = ch_versions.mix(BRACKEN_BRACKEN.out.versions.first())
@@ -255,7 +243,7 @@ workflow BOVISANALYZER {
     //
     // MODULE: Subsample reads
     //
-    if (!params.subsampling_off) {
+    if (!params.skip_subsampling) {
         SUB_SAMPLING(
             ch_variants_fastq
         )
@@ -268,13 +256,6 @@ workflow BOVISANALYZER {
     //
     //ch_tbprofiler = Channel.empty()
     TBPROFILER_PROFILE(
-        ch_tbdb_barcode,
-        ch_tbdb_bed,
-        ch_tbdb_drjson,
-        ch_tbdb_fasta,
-        ch_tbdb_gff,
-        ch_tbdb_varjson,
-        ch_tbdb_verjson,
         ch_variants_fastq
     )
     ch_tbprofiler_collate = TBPROFILER_PROFILE.out.json
@@ -286,23 +267,15 @@ workflow BOVISANALYZER {
     TBPROFILER_COLLATE(
         ch_tbprofiler_collate.collect{it[1]}.ifEmpty([])
     )
-    ch_tbprofiler_metadata = TBPROFILER_COLLATE.out.summary
-
-    //
-    // MODULE: Run SpoTyping
-    //
-    SPOTYPING (
-        ch_variants_fastq
-    )
-    ch_spotyping_spoligoparse = SPOTYPING.out.txt
-    ch_versions = ch_versions.mix(SPOTYPING.out.versions.first())
+    ch_tbprofiler_spoligoparse = TBPROFILER_COLLATE.out.summary
+    ch_tbprofiler_metadata     = TBPROFILER_COLLATE.out.summary
 
     //
     // MODULE: Run spoligoparse
     //
     SPOLIGOPARSE (
-        ch_spoligotype_db,
-        ch_spotyping_spoligoparse.collect{it[1]}.ifEmpty([])
+        ch_tbprofiler_spoligoparse,
+        ch_spoligotype_db
     )
     ch_spoligo_metadata = SPOLIGOPARSE.out.tsv
     ch_versions = ch_versions.mix(SPOLIGOPARSE.out.versions.first())

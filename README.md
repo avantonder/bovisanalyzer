@@ -87,7 +87,6 @@ Alternatively the samplesheet.csv file created by [`nf-core/fetchngs`](https://n
         --input samplesheet.csv \
         --reference <REFERENCE FASTA> \
         --kraken2db minikraken2_v1_8GB \
-        --brackendb minikraken2_v1_8GB \
         --outdir <OUTDIR>
     ```
 

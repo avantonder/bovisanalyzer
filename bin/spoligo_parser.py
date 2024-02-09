@@ -13,8 +13,9 @@ def parser_args(args=None):
     Description = 'Collect SpoTyping outputs, match against spoligotype database and create a summary table'
     Epilog = """Example usage: python spoligo_parser.py """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument("-sb", "--spol_db"    , type=str, default="spoligotype_db.tsv"     , help="Spoligotype database file (default: 'spoligotype_db.tsv').")
-    parser.add_argument("-of", "--output_file", type=str, default="spoligotype_summary.tsv", help="Spoligotype summary file (default: 'spoligotype_summary.tsv').")
+    parser.add_argument("-tb", "--tbprofiler_summary", type=str, default="tbprofiler.txt"         , help="TB-profiler summary file (default: 'tbprofiler.txt').")
+    parser.add_argument("-sb", "--spol_db"           , type=str, default="spoligotype_db.tsv"     , help="Spoligotype database file (default: 'spoligotype_db.tsv').")
+    parser.add_argument("-of", "--output_file"       , type=str, default="spoligotype_summary.tsv", help="Spoligotype summary file (default: 'spoligotype_summary.tsv').")
     return parser.parse_args(args)
 
 def make_dir(path):
@@ -33,29 +34,36 @@ def spol_db_parse(spol_db):
     Function for reading and formatting spoligotype database
     """
     spoligo_db_read = pd.read_csv(spol_db, sep=' ', header=None)
-    spoligo_db_df = spoligo_db_read.iloc[:, [2,1]]
-    spoligo_db_df.columns = ['binary', 'SB number']
+    spoligo_db_df = spoligo_db_read.iloc[:, [0,1]]
+    spoligo_db_df.columns = ['octal', 'SB number']
 
     return spoligo_db_df
 
-def spol_to_dataframe(file_list):
+def tbprofiler_parse(tbprofiler_summary):
     """ 
-    Function to take list of SpoTyping files and create a summary table
+    Function to read TB-profiler summary file and extract octal code 
+    to compare against spoligotype database
     """
-    spoligo_names = [i.replace('.txt', '') for i in file_list]
-    spoligo_names_df = pd.DataFrame(spoligo_names)
-    spoligo_names_df.columns = ['sample']
-    spoligo_files_read = [open(file).read() for file in file_list]
-    spoligo_files_read_df = pd.DataFrame(spoligo_files_read)
-    spoligo_files_read_df = spoligo_files_read_df[0].str.split('\t', expand=True)
-    spoligo_files_read_df = spoligo_files_read_df.replace('\n','', regex=True)
-    spoligo_files_read_df.columns = ['files', 'binary', 'octal']
-    spoligo_merged_df = spoligo_names_df.join(spoligo_files_read_df)
-    cols = ['sample', 'binary', 'octal']
-    spoligo_ordered_df = spoligo_merged_df[cols]
+    tbprofiler_read = pd.read_csv(tbprofiler_summary, sep='\t')
+    tbprofiler_df = tbprofiler_read.iloc[:, [0,3]]
+    tbprofiler_df.columns = ['sample', 'octal']
 
-    return spoligo_ordered_df
-
+    return tbprofiler_df
+    
+def spoligo_match(spoligo_db_df, tbprofiler_df):
+    """ 
+    Function to match TB-profiler octal code against spoligotype database
+    """
+    spoligo_lookup_df = pd.merge(
+        left = tbprofiler_df,
+        right = spoligo_db_df,
+        left_on = 'octal',
+        right_on = 'octal',
+        how = 'left'
+    ).fillna('Not found')
+    
+    return spoligo_lookup_df
+    
 def main(args=None):
     args = parser_args(args)
 
@@ -63,26 +71,17 @@ def main(args=None):
     out_dir = os.path.dirname(args.output_file)
     make_dir(out_dir)
 
-    ## Create list of SpoTyping output files
-    spoligo_files = sorted(glob.glob('*.txt'))
-
-    ## Create dataframe
-    spoligo_df = spol_to_dataframe(spoligo_files)
+    ## Parse and format TB-profiler summary file
+    tbprofiler_df = tbprofiler_parse(args.tbprofiler_summary)
 
     ## Parse and format spoligotype database
     spoligo_db = spol_db_parse(args.spol_db)
     
     ## Merge spotyping results and database
-    spoligo_lookup_df = pd.merge(
-        left=spoligo_df,
-        right=spoligo_db,
-        left_on='binary',
-        right_on='binary',
-        how='left'
-    ).fillna('Not found')
+    spoligo_lookup_df = spoligo_match(spoligo_db, tbprofiler_df)
 
     ## Final column order
-    cols = ['sample', 'SB number', 'binary', 'octal']
+    cols = ['sample', 'SB number', 'octal']
     spoligo_ordered_df = spoligo_lookup_df[cols]
 
     ## Write output file

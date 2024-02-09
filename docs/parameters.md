@@ -11,9 +11,8 @@ Define where the pipeline should find input data and save output data.
 | `input` | Path to comma-separated file containing information about the samples in the experiment. <details><summary>Help</summary><small>You will need to create a design file with information about 
 the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.</small></details>| `string`
 |  |  |  |
-| `reference` |  | `string` | None |  |  |
-| `kraken2db` |  | `string` | None |  |  |
-| `brackendb` |  | `string` | None |  |  |
+| `reference` | Path to reference genome | `string` | None |  |  |
+| `kraken2db` | Path to Kraken 2 database | `string` | None |  |  |
 | `outdir` | The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure. | `string` |  |  |  |
 | `email` | Email address for completion summary. <details><summary>Help</summary><small>Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the 
 workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.</small></details>| `string` |  |  |  |
@@ -38,7 +37,7 @@ workflow exits. If set in your user config file (`~/.nextflow/config`) then you 
 
 | Parameter | Description | Type | Default | Required | Hidden |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| `subsampling_off` | Skip sub-sampling with Rasusa. | `boolean` |  |  |  |
+| `skip_subsampling` | Skip sub-sampling with Rasusa. | `boolean` |  |  |  |
 | `subsampling_depth_cutoff` | Desired coverage depth when sub-sampling. | `integer` | 100 |  |  |
 | `genome_size` | Genome size for sub-sampling (set to 4.3 Mb for M. bovis). | `string` | 4.3mb |  |  |
 
